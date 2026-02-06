@@ -91,6 +91,80 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    // Function to show popup
+    function showPopup(message) {
+        // Create overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'popup-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        overlay.style.display = 'flex';
+        overlay.style.justifyContent = 'center';
+        overlay.style.alignItems = 'center';
+        overlay.style.zIndex = '1000';
+        
+        // Create popup content
+        const popup = document.createElement('div');
+        popup.style.backgroundColor = 'white';
+        popup.style.padding = '30px';
+        popup.style.borderRadius = '10px';
+        popup.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
+        popup.style.textAlign = 'center';
+        popup.style.maxWidth = '500px';
+        popup.style.width = '80%';
+        popup.style.position = 'relative';
+        
+        // Add message
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message;
+        messageElement.style.marginBottom = '20px';
+        messageElement.style.fontSize = '16px';
+        messageElement.style.lineHeight = '1.5';
+        
+        // Add acknowledge button
+        const acknowledgeButton = document.createElement('button');
+        acknowledgeButton.textContent = 'OK';
+        acknowledgeButton.style.padding = '10px 20px';
+        acknowledgeButton.style.backgroundColor = '#4b6cb7';
+        acknowledgeButton.style.color = 'white';
+        acknowledgeButton.style.border = 'none';
+        acknowledgeButton.style.borderRadius = '5px';
+        acknowledgeButton.style.cursor = 'pointer';
+        acknowledgeButton.style.fontWeight = 'bold';
+        acknowledgeButton.style.transition = 'background-color 0.3s';
+        
+        acknowledgeButton.addEventListener('click', () => {
+            document.body.removeChild(overlay);
+        });
+        
+        acknowledgeButton.addEventListener('mouseenter', () => {
+            acknowledgeButton.style.backgroundColor = '#3a5795';
+        });
+        
+        acknowledgeButton.addEventListener('mouseleave', () => {
+            acknowledgeButton.style.backgroundColor = '#4b6cb7';
+        });
+        
+        popup.appendChild(messageElement);
+        popup.appendChild(acknowledgeButton);
+        overlay.appendChild(popup);
+        document.body.appendChild(overlay);
+        
+        // Disable chat functionality
+        messageInput.disabled = true;
+        sendButton.disabled = true;
+        
+        // Re-enable when popup is closed
+        acknowledgeButton.addEventListener('click', () => {
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+        });
+    }
+    
     // Event listeners
     sendButton.addEventListener('click', sendMessage);
     
@@ -104,4 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         addMessage("Hello! I'm your AI assistant. How can I help you today?");
     }, 500);
+    
+    // Example usage of popup (can be called from anywhere)
+    // showPopup("This is a test notification!");
 });
