@@ -180,5 +180,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 500);
     
     // Example usage of popup (can be called from anywhere)
-    // showPopup("This is a test notification!");
+    showPopup("This is a test notification!");
+
+
+    // renderer.js
+(async () => {
+  const theme = await window.settings.getTheme();
+  document.documentElement.dataset.theme = theme; // or apply a class
+})();
+
+// when user toggles:
+document.querySelector('#darkModeToggle').addEventListener('change', (e) => {
+  window.settings.setTheme(e.target.checked ? 'dark' : 'light');
+});
+
 });

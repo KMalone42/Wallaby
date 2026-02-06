@@ -1,5 +1,21 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, nativeTheme } = require('electron');
 const path = require('path');
+const Store = require('electron-store');
+
+const store = new Store({
+  name: 'settings',
+  defaults: { 
+        theme: 'system', // 'light' | 'dark' | 'system'
+        ollamaBaseUrl: 'http://localhost:11434',
+  } 
+});
+
+
+const store = new Store({
+  name: 'settings',
+  defaults: { theme: 'system' } // 'light' | 'dark' | 'system'
+});
+
 
 let mainWindow;
 
