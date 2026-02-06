@@ -22,10 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Function to get API endpoint from settings
     function getAPIEndpoint() {
-        // This would normally read from settings
-        // For now, we'll use a default value and prompt if needed
+        // Check if we have a saved endpoint
         const savedEndpoint = localStorage.getItem('ollamaEndpoint');
         if (!savedEndpoint) {
+            // Show popup to get endpoint
             const endpoint = prompt('Please enter your Ollama API endpoint (e.g., http://localhost:11434):');
             if (endpoint) {
                 localStorage.setItem('ollamaEndpoint', endpoint);

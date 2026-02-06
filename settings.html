@@ -4,8 +4,59 @@
     <meta charset="UTF-8">
     <title>Settings - AI Chat Assistant</title>
     <link rel="stylesheet" href="settings-styles.css">
+    <style>
+        .banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .banner.show {
+            display: block;
+        }
+        
+        .banner input {
+            padding: 8px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 4px;
+            width: 300px;
+        }
+        
+        .banner button {
+            padding: 8px 15px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .banner .save-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .banner .cancel-btn {
+            background-color: #f44336;
+            color: white;
+        }
+    </style>
 </head>
 <body>
+    <div class="banner" id="endpoint-banner">
+        <span>Enter your Ollama API endpoint:</span>
+        <input type="text" id="banner-endpoint" placeholder="e.g., http://localhost:11434">
+        <button class="save-btn" onclick="saveEndpoint()">Save</button>
+        <button class="cancel-btn" onclick="hideBanner()">Cancel</button>
+    </div>
+    
     <div class="settings-container">
         <div class="settings-header">
             <h1>Settings</h1>
@@ -97,5 +148,31 @@
             <button class="save-button">Save Settings</button>
         </div>
     </div>
+
+    <script>
+        // Check if endpoint is saved and show banner if not
+        window.addEventListener('load', function() {
+            const savedEndpoint = localStorage.getItem('ollamaEndpoint');
+            if (!savedEndpoint) {
+                showBanner();
+            }
+        });
+        
+        function showBanner() {
+            document.getElementById('endpoint-banner').classList.add('show');
+        }
+        
+        function hideBanner() {
+            document.getElementById('endpoint-banner').classList.remove('show');
+        }
+        
+        function saveEndpoint() {
+            const endpoint = document.getElementById('banner-endpoint').value;
+            if (endpoint) {
+                localStorage.setItem('ollamaEndpoint', endpoint);
+                hideBanner();
+            }
+        }
+    </script>
 </body>
 </html>
