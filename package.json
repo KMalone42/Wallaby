@@ -1,0 +1,15 @@
+{
+  "name": "wallaby",
+  "version": "1.0.0",
+  "description": "a robust electron client for Ollama and other generic llm applications",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Electron"
+  ],
+  "author": "kmalone",
+  "license": "MIT"
+}
