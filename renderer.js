@@ -20,35 +20,74 @@ document.addEventListener('DOMContentLoaded', () => {
         chatContainer.scrollTop = chatContainer.scrollHeight;
     }
     
-    // Function to simulate AI response
-    function getAIResponse(userMessage) {
-        // This would normally call an AI API
-        const responses = [
-            "That's an interesting question! Let me think about that for a moment.",
-            "I understand what you're asking. Based on my knowledge, here's what I can tell you...",
-            "Great question! Here's a detailed explanation of that concept.",
-            "I've analyzed your query and here's my response to that topic.",
-            "Thanks for asking! Here's what I know about that subject.",
-            "That's a complex topic, but I'll do my best to explain it clearly."
-        ];
-        
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        return `${randomResponse} Regarding "${userMessage}", I can provide more detailed information if you'd like me to elaborate on any specific aspect.`;
+    // Function to get API endpoint from settings
+    function getAPIEndpoint() {
+        // This would normally read from settings
+        // For now, we'll use a default value and prompt if needed
+        const savedEndpoint = localStorage.getItem('ollamaEndpoint');
+        if (!savedEndpoint) {
+            const endpoint = prompt('Please enter your Ollama API endpoint (e.g., http://localhost:11434):');
+            if (endpoint) {
+                localStorage.setItem('ollamaEndpoint', endpoint);
+                return endpoint;
+            } else {
+                // If no endpoint provided, use default
+                return 'http://localhost:11434';
+            }
+        }
+        return savedEndpoint;
+    }
+    
+    // Function to call Ollama API
+    async function callOllamaAPI(prompt) {
+        try {
+            const endpoint = getAPIEndpoint();
+            const response = await fetch(`${endpoint}/api/generate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'llama2', // Default model, can be made configurable
+                    prompt: prompt,
+                    stream: false
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.response;
+        } catch (error) {
+            console.error('Error calling Ollama API:', error);
+            return "Sorry, I encountered an error while processing your request. Please check your API endpoint and try again.";
+        }
     }
     
     // Send message function
-    function sendMessage() {
+    async function sendMessage() {
         const message = messageInput.value.trim();
         if (message) {
             // Add user message
             addMessage(message, true);
             messageInput.value = '';
             
-            // Simulate AI thinking
-            setTimeout(() => {
-                const aiResponse = getAIResponse(message);
+            // Show thinking indicator
+            const thinkingMessage = addMessage("Thinking...", false);
+            
+            try {
+                // Call Ollama API
+                const aiResponse = await callOllamaAPI(message);
+                // Remove thinking indicator and add actual response
+                chatContainer.removeChild(thinkingMessage);
                 addMessage(aiResponse);
-            }, 1000);
+            } catch (error) {
+                // Remove thinking indicator and show error
+                chatContainer.removeChild(thinkingMessage);
+                addMessage("Error: Could not get response from AI. Please check your API settings.");
+            }
         }
     }
     
