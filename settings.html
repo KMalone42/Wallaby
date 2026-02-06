@@ -70,8 +70,8 @@
                     <label for="theme">Theme</label>
                     <select id="theme">
                         <option value="light">Light</option>
-                        <option value="dark" selected>Dark</option>
-                        <option value="auto">Auto</option>
+                        <option value="dark">Dark</option>
+                        <option value="system">System</option>
                     </select>
                 </div>
                 
@@ -92,7 +92,7 @@
                     <label for="model">Model</label>
                     <select id="model">
                         <option value="gpt-3.5">GPT-3.5</option>
-                        <option value="gpt-4" selected>GPT-4</option>
+                        <option value="gpt-4">GPT-4</option>
                         <option value="claude">Claude</option>
                         <option value="llama">Llama 2</option>
                     </select>
@@ -108,12 +108,12 @@
             <div class="setting-group">
                 <h2>Privacy</h2>
                 <div class="setting-item checkbox">
-                    <input type="checkbox" id="save-history" checked>
+                    <input type="checkbox" id="save-history">
                     <label for="save-history">Save chat history</label>
                 </div>
                 
                 <div class="setting-item checkbox">
-                    <input type="checkbox" id="auto-save" checked>
+                    <input type="checkbox" id="auto-save">
                     <label for="auto-save">Auto-save conversations</label>
                 </div>
                 
@@ -144,19 +144,105 @@
         </div>
         
         <div class="settings-footer">
-            <button class="reset-button">Reset to Defaults</button>
-            <button class="save-button">Save Settings</button>
+            <button class="reset-button" onclick="resetToDefaults()">Reset to Defaults</button>
+            <button class="save-button" onclick="saveSettings()">Save Settings</button>
         </div>
     </div>
 
     <script>
-        // Check if endpoint is saved and show banner if not
-        window.addEventListener('load', function() {
-            const savedEndpoint = localStorage.getItem('ollamaEndpoint');
-            if (!savedEndpoint) {
-                showBanner();
+        // Load settings when page loads
+        window.addEventListener('load', async function() {
+            try {
+                // Load all settings
+                const theme = await window.settings.getTheme();
+                const language = await window.settings.getLanguage();
+                const model = await window.settings.getModel();
+                const temperature = await window.settings.getTemperature();
+                const saveHistory = await window.settings.getSaveHistory();
+                const autoSave = await window.settings.getAutoSave();
+                const analytics = await window.settings.getAnalytics();
+                const ollamaEndpoint = await window.settings.getOllamaBaseUrl();
+                const maxTokens = await window.settings.getMaxTokens();
+                const timeout = await window.settings.getTimeout();
+                
+                // Set values in UI
+                document.getElementById('theme').value = theme;
+                document.getElementById('language').value = language;
+                document.getElementById('model').value = model;
+                document.getElementById('temperature').value = temperature;
+                document.getElementById('temperature-value').textContent = temperature;
+                document.getElementById('save-history').checked = saveHistory;
+                document.getElementById('auto-save').checked = autoSave;
+                document.getElementById('analytics').checked = analytics;
+                document.getElementById('ollama-endpoint').value = ollamaEndpoint;
+                document.getElementById('max-tokens').value = maxTokens;
+                document.getElementById('timeout').value = timeout;
+                
+                // Check if endpoint is saved and show banner if not
+                if (!ollamaEndpoint || ollamaEndpoint === 'http://localhost:11434') {
+                    showBanner();
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
             }
         });
+        
+        // Update temperature value display
+        document.getElementById('temperature').addEventListener('input', function() {
+            document.getElementById('temperature-value').textContent = this.value;
+        });
+        
+        // Save settings function
+        async function saveSettings() {
+            try {
+                const theme = document.getElementById('theme').value;
+                const language = document.getElementById('language').value;
+                const model = document.getElementById('model').value;
+                const temperature = document.getElementById('temperature').value;
+                const saveHistory = document.getElementById('save-history').checked;
+                const autoSave = document.getElementById('auto-save').checked;
+                const analytics = document.getElementById('analytics').checked;
+                const ollamaEndpoint = document.getElementById('ollama-endpoint').value;
+                const maxTokens = document.getElementById('max-tokens').value;
+                const timeout = document.getElementById('timeout').value;
+                
+                // Save all settings
+                await window.settings.setTheme(theme);
+                await window.settings.setLanguage(language);
+                await window.settings.setModel(model);
+                await window.settings.setTemperature(temperature);
+                await window.settings.setSaveHistory(saveHistory);
+                await window.settings.setAutoSave(autoSave);
+                await window.settings.setAnalytics(analytics);
+                await window.settings.setOllamaBaseUrl(ollamaEndpoint);
+                await window.settings.setMaxTokens(maxTokens);
+                await window.settings.setTimeout(timeout);
+                
+                // Hide banner if endpoint was saved
+                if (ollamaEndpoint) {
+                    hideBanner();
+                }
+                
+                alert('Settings saved successfully!');
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                alert('Error saving settings');
+            }
+        }
+        
+        // Reset to defaults
+        async function resetToDefaults() {
+            if (confirm('Are you sure you want to reset all settings to defaults?')) {
+                try {
+                    await window.settings.resetToDefaults();
+                    // Reload page to apply defaults
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Error resetting settings:', error);
+                    alert('Error resetting settings');
+                }
+            }
+        }
         
         function showBanner() {
             document.getElementById('endpoint-banner').classList.add('show');
@@ -169,7 +255,7 @@
         function saveEndpoint() {
             const endpoint = document.getElementById('banner-endpoint').value;
             if (endpoint) {
-                localStorage.setItem('ollamaEndpoint', endpoint);
+                window.settings.setOllamaBaseUrl(endpoint);
                 hideBanner();
             }
         }

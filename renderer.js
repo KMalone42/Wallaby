@@ -21,27 +21,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Function to get API endpoint from settings
-    function getAPIEndpoint() {
-        // Check if we have a saved endpoint
-        const savedEndpoint = localStorage.getItem('ollamaEndpoint');
-        if (!savedEndpoint) {
-            // Show popup to get endpoint
-            const endpoint = prompt('Please enter your Ollama API endpoint (e.g., http://localhost:11434):');
-            if (endpoint) {
-                localStorage.setItem('ollamaEndpoint', endpoint);
-                return endpoint;
+    async function getAPIEndpoint() {
+        try {
+            // Try to get endpoint from settings
+            const savedEndpoint = await window.settings.getOllamaBaseUrl();
+            if (savedEndpoint) {
+                return savedEndpoint;
             } else {
                 // If no endpoint provided, use default
                 return 'http://localhost:11434';
             }
+        } catch (error) {
+            console.error('Error getting API endpoint:', error);
+            return 'http://localhost:11434';
         }
-        return savedEndpoint;
     }
     
     // Function to call Ollama API
     async function callOllamaAPI(prompt) {
         try {
-            const endpoint = getAPIEndpoint();
+            const endpoint = await getAPIEndpoint();
             const response = await fetch(`${endpoint}/api/generate`, {
                 method: 'POST',
                 headers: {
@@ -180,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 500);
     
     // Example usage of popup (can be called from anywhere)
-    showPopup("This is a test notification!");
+    // showPopup("This is a test notification!");
 
 
     // renderer.js
