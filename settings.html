@@ -150,6 +150,43 @@
     </div>
 
     <script>
+        const { ipcRenderer } = require('electron');
+
+        // Make window.settings exist
+        window.settings = {
+          getTheme: () => ipcRenderer.invoke('settings:getTheme'),
+          setTheme: (v) => ipcRenderer.invoke('settings:setTheme', v),
+
+          getLanguage: () => ipcRenderer.invoke('settings:getLanguage'),
+          setLanguage: (v) => ipcRenderer.invoke('settings:setLanguage', v),
+
+          getModel: () => ipcRenderer.invoke('settings:getModel'),
+          setModel: (v) => ipcRenderer.invoke('settings:setModel', v),
+
+          getTemperature: () => ipcRenderer.invoke('settings:getTemperature'),
+          setTemperature: (v) => ipcRenderer.invoke('settings:setTemperature', v),
+
+          getSaveHistory: () => ipcRenderer.invoke('settings:getSaveHistory'),
+          setSaveHistory: (v) => ipcRenderer.invoke('settings:setSaveHistory', v),
+
+          getAutoSave: () => ipcRenderer.invoke('settings:getAutoSave'),
+          setAutoSave: (v) => ipcRenderer.invoke('settings:setAutoSave', v),
+
+          getAnalytics: () => ipcRenderer.invoke('settings:getAnalytics'),
+          setAnalytics: (v) => ipcRenderer.invoke('settings:setAnalytics', v),
+
+          getOllamaBaseUrl: () => ipcRenderer.invoke('settings:getOllamaBaseUrl'),
+          setOllamaBaseUrl: (v) => ipcRenderer.invoke('settings:setOllamaBaseUrl', v),
+
+          getMaxTokens: () => ipcRenderer.invoke('settings:getMaxTokens'),
+          setMaxTokens: (v) => ipcRenderer.invoke('settings:setMaxTokens', v),
+
+          getTimeout: () => ipcRenderer.invoke('settings:getTimeout'),
+          setTimeout: (v) => ipcRenderer.invoke('settings:setTimeout', v),
+
+          resetToDefaults: () => ipcRenderer.invoke('settings:resetToDefaults'),
+        };
+
         // Load settings when page loads
         window.addEventListener('load', async function() {
             try {
@@ -186,6 +223,13 @@
                 console.error('Error loading settings:', error);
             }
         });
+
+        async function call(name, fn) {
+          console.log(`→ saving ${name}`);
+          const result = await fn();
+          console.log(`✓ saved ${name}`, result);
+          return result;
+        }
         
         // Update temperature value display
         document.getElementById('temperature').addEventListener('input', function() {
@@ -194,6 +238,7 @@
         
         // Save settings function
         async function saveSettings() {
+            console.log('settings API', window.settings);
             try {
                 const theme = document.getElementById('theme').value;
                 const language = document.getElementById('language').value;
@@ -207,16 +252,16 @@
                 const timeout = document.getElementById('timeout').value;
                 
                 // Save all settings
-                await window.settings.setTheme(theme);
-                await window.settings.setLanguage(language);
-                await window.settings.setModel(model);
-                await window.settings.setTemperature(temperature);
-                await window.settings.setSaveHistory(saveHistory);
-                await window.settings.setAutoSave(autoSave);
-                await window.settings.setAnalytics(analytics);
-                await window.settings.setOllamaBaseUrl(ollamaEndpoint);
-                await window.settings.setMaxTokens(maxTokens);
-                await window.settings.setTimeout(timeout);
+                await call('theme', () => window.settings.setTheme(theme));
+                await call('language', () => window.settings.setLanguage(language));
+                await call('model', () => window.settings.setModel(model));
+                await call('temperature', () => window.settings.setTemperature(temperature));
+                await call('saveHistory', () => window.settings.setSaveHistory(saveHistory));
+                await call('autoSave', () => window.settings.setAutoSave(autoSave));
+                await call('analytics', () => window.settings.setAnalytics(analytics));
+                await call('ollamaBaseUrl', () => window.settings.setOllamaBaseUrl(ollamaEndpoint));
+                await call('maxTokens', () => window.settings.setMaxTokens(maxTokens));
+                await call('timeout', () => window.settings.setTimeout(timeout));
                 
                 // Hide banner if endpoint was saved
                 if (ollamaEndpoint) {

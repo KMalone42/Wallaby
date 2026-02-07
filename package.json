@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "a robust electron client for Ollama and other generic llm applications",
   "main": "main.js",
+  "type": "module",
   "scripts": {
     "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,5 +12,8 @@
     "Electron"
   ],
   "author": "kmalone",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "electron-store": "^11.0.2"
+  }
 }

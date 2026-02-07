@@ -1,6 +1,11 @@
-const { app, BrowserWindow, Menu, ipcMain, nativeTheme } = require('electron');
-const path = require('path');
-const Store = require('electron-store');
+// main.js
+import { app, BrowserWindow, Menu, ipcMain, nativeTheme } from 'electron';
+import path from 'path';
+import Store from 'electron-store';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const store = new Store({
   name: 'settings',
@@ -15,7 +20,7 @@ const store = new Store({
         analytics: false,
         maxTokens: 1000,
         timeout: 30,
-  } 
+  },
 });
 
 let mainWindow;
@@ -26,12 +31,17 @@ function createWindow() {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      partition: 'persist:wallaby',
     },
     icon: path.join(__dirname, 'icon.png')
   });
 
   mainWindow.loadFile('index.html');
+
+  if (!app.isPackaged) {
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
+  }
   
   // Create menu
   const menuTemplate = [
@@ -63,88 +73,101 @@ app.on('activate', () => {
   }
 });
 
+console.log('userData:', app.getPath('userData'));
+console.log('store path:', store.path);
+
+// ============================================================================
 // IPC handlers for settings
+function logSet(key, value) {
+  console.log(`[settings] set ${key} =`, value);
+  store.set(key, value);
+  return true;
+}
+
+// Setters
+// ----------------------------------------------------------------------------
+ipcMain.handle('settings:setTheme', (_, theme) =>
+  logSet('theme', theme)
+);
+ipcMain.handle('settings:setOllamaBaseUrl', (_, ollamaBaseUrl) =>
+  logSet('ollamaBaseUrl', ollamaBaseUrl)
+);
+ipcMain.handle('settings:setLanguage', (_, language) =>
+  logSet('language', language)
+);
+ipcMain.handle('settings:setModel', (_, model) =>
+  logSet('model', model)
+);
+ipcMain.handle('settings:setTemperature', (_, temperature) =>
+  logSet('temperature', temperature)
+);
+ipcMain.handle('settings:setSaveHistory', (_, saveHistory) =>
+  logSet('saveHistory', saveHistory)
+);
+ipcMain.handle('settings:setAutoSave', (_, autoSave) =>
+  logSet('autoSave', autoSave)
+);
+ipcMain.handle('settings:setAnalytics', (_, analytics) =>
+  logSet('analytics', analytics)
+);
+ipcMain.handle('settings:setMaxTokens', (_, maxTokens) =>
+  logSet('maxTokens', maxTokens)
+);
+ipcMain.handle('settings:setTimeout', (_, timeout) =>
+  logSet('timeout', timeout)
+);
+// ----------------------------------------------------------------------------
+//
+// Getters
+// ----------------------------------------------------------------------------
 ipcMain.handle('settings:getTheme', () => {
+  console.log(store.get('theme'));
   return store.get('theme');
 });
 
-ipcMain.handle('settings:setTheme', (event, theme) => {
-  store.set('theme', theme);
-});
 
 ipcMain.handle('settings:getOllamaBaseUrl', () => {
+  console.log(store.get('ollamaBaseUrl'));
   return store.get('ollamaBaseUrl');
 });
 
-ipcMain.handle('settings:setOllamaBaseUrl', (event, baseUrl) => {
-  store.set('ollamaBaseUrl', baseUrl);
-});
 
 ipcMain.handle('settings:getLanguage', () => {
   return store.get('language');
 });
 
-ipcMain.handle('settings:setLanguage', (event, language) => {
-  store.set('language', language);
-});
 
 ipcMain.handle('settings:getModel', () => {
   return store.get('model');
 });
 
-ipcMain.handle('settings:setModel', (event, model) => {
-  store.set('model', model);
-});
 
 ipcMain.handle('settings:getTemperature', () => {
   return store.get('temperature');
-});
-
-ipcMain.handle('settings:setTemperature', (event, temperature) => {
-  store.set('temperature', temperature);
 });
 
 ipcMain.handle('settings:getSaveHistory', () => {
   return store.get('saveHistory');
 });
 
-ipcMain.handle('settings:setSaveHistory', (event, saveHistory) => {
-  store.set('saveHistory', saveHistory);
-});
-
 ipcMain.handle('settings:getAutoSave', () => {
   return store.get('autoSave');
-});
-
-ipcMain.handle('settings:setAutoSave', (event, autoSave) => {
-  store.set('autoSave', autoSave);
 });
 
 ipcMain.handle('settings:getAnalytics', () => {
   return store.get('analytics');
 });
 
-ipcMain.handle('settings:setAnalytics', (event, analytics) => {
-  store.set('analytics', analytics);
-});
-
 ipcMain.handle('settings:getMaxTokens', () => {
   return store.get('maxTokens');
-});
-
-ipcMain.handle('settings:setMaxTokens', (event, maxTokens) => {
-  store.set('maxTokens', maxTokens);
 });
 
 ipcMain.handle('settings:getTimeout', () => {
   return store.get('timeout');
 });
 
-ipcMain.handle('settings:setTimeout', (event, timeout) => {
-  store.set('timeout', timeout);
-});
-
 ipcMain.handle('settings:resetToDefaults', () => {
   store.clear();
   return store.store;
 });
+// ----------------------------------------------------------------------------
