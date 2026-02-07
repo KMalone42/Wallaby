@@ -1,6 +1,6 @@
-// preload.js
 const { contextBridge, ipcRenderer } = require('electron');
 
+// Expose settings API
 contextBridge.exposeInMainWorld('settings', {
   getTheme: () => ipcRenderer.invoke('settings:getTheme'),
   setTheme: (theme) => ipcRenderer.invoke('settings:setTheme', theme),

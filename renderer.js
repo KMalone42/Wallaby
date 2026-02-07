@@ -23,6 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to get API endpoint from settings
     async function getAPIEndpoint() {
         try {
+            // Ensure settings is available
+            if (typeof window.settings === 'undefined') {
+                console.error('Settings API is not available');
+                return 'http://localhost:11434';
+            }
+            
             // Try to get endpoint from settings
             const savedEndpoint = await window.settings.getOllamaBaseUrl();
             if (savedEndpoint) {
