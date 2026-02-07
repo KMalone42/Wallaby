@@ -43,20 +43,7 @@ function createWindow() {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   }
   
-  // Create menu
-  const menuTemplate = [
-    {
-      label: 'Menu',
-      submenu: [
-        { label: 'Settings', click: () => mainWindow.loadFile('settings.html') },
-        { type: 'separator' },
-        { label: 'Quit', click: () => app.quit() }
-      ]
-    }
-  ];
-  
-  const menu = Menu.buildFromTemplate(menuTemplate);
-  Menu.setApplicationMenu(menu);
+  Menu.setApplicationMenu(null);
 }
 
 app.whenReady().then(createWindow);
