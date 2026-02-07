@@ -71,11 +71,12 @@ async function callOllamaAPI(prompt) {
 }
 
 async function sendMessage() {
-    const message = document.getElementById('message-input').value.trim();
+    const messageInput = document.getElementById('message-input');
+    const message = messageInput.value.trim();
     if (message) {
         // Add user message
         addMessage(message, true);
-        document.getElementById('message-input').value = '';
+        messageInput.value = '';
         
         // Show thinking indicator
         const thinkingMessage = addMessage("Thinking...", false);
@@ -132,18 +133,28 @@ function showPopup(message) {
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
     // Set up event listeners
-    document.getElementById('send-button').addEventListener('click', sendMessage);
-    document.getElementById('message-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
+    const sendButton = document.getElementById('send-button');
+    if (sendButton) {
+        sendButton.addEventListener('click', sendMessage);
+    }
+    
+    const messageInput = document.getElementById('message-input');
+    if (messageInput) {
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
     
     // Set up settings button
-    document.getElementById('settings-button').addEventListener('click', () => {
-        // Navigate to settings page
-        window.location.href = 'settings.html';
-    });
+    const settingsButton = document.getElementById('settings-button');
+    if (settingsButton) {
+        settingsButton.addEventListener('click', () => {
+            // Navigate to settings page
+            window.location.href = 'settings.html';
+        });
+    }
     
     // Add initial welcome message
     setTimeout(() => {
