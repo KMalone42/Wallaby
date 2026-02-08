@@ -44,6 +44,8 @@ async function getAPIEndpoint() {
 async function callOllamaAPI(prompt) {
     try {
         const endpoint = await getAPIEndpoint();
+        console.log('Using endpoint:', endpoint);
+        
         const response = await fetch(`${endpoint}/api/generate`, {
             method: 'POST',
             headers: {
