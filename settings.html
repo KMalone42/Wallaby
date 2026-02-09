@@ -150,6 +150,7 @@
     </div>
 
     <script>
+        // Ensure we have access to ipcRenderer
         const { ipcRenderer } = require('electron');
 
         // Make window.settings exist
@@ -224,14 +225,21 @@
                 }
             } catch (error) {
                 console.error('Error loading settings:', error);
+                // Show banner if we can't load settings
+                showBanner();
             }
         });
 
         async function call(name, fn) {
           console.log(`→ saving ${name}`);
-          const result = await fn();
-          console.log(`✓ saved ${name}`, result);
-          return result;
+          try {
+            const result = await fn();
+            console.log(`✓ saved ${name}`, result);
+            return result;
+          } catch (error) {
+            console.error(`Error saving ${name}:`, error);
+            throw error;
+          }
         }
         
         // Update temperature value display
