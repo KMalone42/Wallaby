@@ -19,14 +19,53 @@ function addMessage(content, isUser = false) {
   return messageDiv; // ✅ IMPORTANT
 }
 
+// Cache for settings to avoid repeated API calls
+let cachedSettings = null;
+let settingsLoaded = false;
 
+async function getSettings() {
+  if (settingsLoaded && cachedSettings) {
+    return cachedSettings;
+  }
 
+  try {
+    if (typeof window.settings === 'undefined') {
+      console.warn('Settings API is not available, using defaults');
+      return {
+        ollamaBaseUrl: 'http://localhost:11434',
+        model: 'llama2',
+        temperature: 0.7,
+        maxTokens: 1000
+      };
+    }
+    
+    const settings = {
+      ollamaBaseUrl: await window.settings.getOllamaBaseUrl(),
+      model: await window.settings.getModel(),
+      temperature: await window.settings.getTemperature(),
+      maxTokens: await window.settings.getMaxTokens()
+    };
+    
+    cachedSettings = settings;
+    settingsLoaded = true;
+    return settings;
+  } catch (error) {
+    console.error('Error getting settings:', error);
+    // Return defaults if settings API fails
+    return {
+      ollamaBaseUrl: 'http://localhost:11434',
+      model: 'llama2',
+      temperature: 0.7,
+      maxTokens: 1000
+    };
+  }
+}
 
 async function getAPIEndpoint() {
     try {
         // Ensure settings is available
         if (typeof window.settings === 'undefined') {
-            console.error('Settings API is not available');
+            console.warn('Settings API is not available, using default endpoint');
             return 'http://localhost:11434';
         }
         
@@ -40,12 +79,14 @@ async function getAPIEndpoint() {
         return 'http://localhost:11434';
     } catch (error) {
         console.error('Error getting API endpoint:', error);
+        // Even if there's an error, return default endpoint
         return 'http://localhost:11434';
     }
 }
 
 async function callOllamaAPI(prompt) {
     try {
+        const settings = await getSettings();
         const endpoint = await getAPIEndpoint();
         console.log('Using endpoint:', endpoint);
         
@@ -55,11 +96,11 @@ async function callOllamaAPI(prompt) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'llama2', // Default model, can be made configurable
+                model: settings.model || 'llama2',
                 prompt: prompt,
                 stream: false,
-                temperature: 0.7,
-                max_tokens: 1000
+                temperature: settings.temperature || 0.7,
+                max_tokens: settings.maxTokens || 1000
             })
         });
         
@@ -71,10 +112,15 @@ async function callOllamaAPI(prompt) {
         return data.response;
     } catch (error) {
         console.error('Error calling Ollama API:', error);
+        
+        // Show a more helpful error message to the user
+        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+            throw new Error('Could not connect to Ollama API. Please ensure Ollama is running and accessible at the configured endpoint.');
+        }
+        
         throw error;
     }
 }
-
 
 async function sendMessage() {
   console.log('sendMessage clicked');
@@ -96,7 +142,6 @@ async function sendMessage() {
     addMessage(`Error: ${error.message}`, false);
   }
 }
-
 
 function showPopup(message) {
     // Create overlay
@@ -131,7 +176,6 @@ function showPopup(message) {
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
 }
-
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
