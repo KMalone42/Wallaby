@@ -1,23 +1,26 @@
 // renderer.js
-import { ipcRenderer } from 'electron';
 
 function addMessage(content, isUser = false) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
-    
-    const time = new Date();
-    const timeString = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
-    messageDiv.innerHTML = `
-        <div class="message-content">${content}</div>
-        <div class="message-time">${timeString}</div>
-    `;
-    
-    document.querySelector('.chat-container').appendChild(messageDiv);
-    
-    // Scroll to bottom
-    document.querySelector('.chat-container').scrollTop = document.querySelector('.chat-container').scrollHeight;
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+
+  const time = new Date();
+  const timeString = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  messageDiv.innerHTML = `
+    <div class="message-content">${content}</div>
+    <div class="message-time">${timeString}</div>
+  `;
+
+  const chat = document.querySelector('.chat-container');
+  chat.appendChild(messageDiv);
+  chat.scrollTop = chat.scrollHeight;
+
+  return messageDiv; // ✅ IMPORTANT
 }
+
+
+
 
 async function getAPIEndpoint() {
     try {
@@ -72,31 +75,28 @@ async function callOllamaAPI(prompt) {
     }
 }
 
+
 async function sendMessage() {
-    const messageInput = document.getElementById('message-input');
-    const message = messageInput.value.trim();
-    if (message) {
-        // Add user message
-        addMessage(message, true);
-        messageInput.value = '';
-        
-        // Show thinking indicator
-        const thinkingMessage = addMessage("Thinking...", false);
-        
-        try {
-            const response = await callOllamaAPI(message);
-            // Remove thinking indicator
-            document.querySelector('.chat-container').removeChild(thinkingMessage);
-            // Add AI response
-            addMessage(response, false);
-        } catch (error) {
-            // Remove thinking indicator
-            document.querySelector('.chat-container').removeChild(thinkingMessage);
-            // Add error message
-            addMessage(`Error: ${error.message}`, false);
-        }
-    }
+  console.log('sendMessage clicked');
+  const messageInput = document.getElementById('message-input');
+  const message = messageInput.value.trim();
+  if (!message) return;
+
+  addMessage(message, true);
+  messageInput.value = '';
+
+  const thinkingNode = addMessage("Thinking...", false);
+
+  try {
+    const response = await callOllamaAPI(message);
+    thinkingNode.remove();
+    addMessage(response, false);
+  } catch (error) {
+    thinkingNode.remove();
+    addMessage(`Error: ${error.message}`, false);
+  }
 }
+
 
 function showPopup(message) {
     // Create overlay
@@ -132,6 +132,7 @@ function showPopup(message) {
     document.body.appendChild(overlay);
 }
 
+
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
     // Set up event listeners
@@ -139,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sendButton) {
         sendButton.addEventListener('click', sendMessage);
     }
-    
+
     const messageInput = document.getElementById('message-input');
     if (messageInput) {
         messageInput.addEventListener('keypress', (e) => {
@@ -148,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Set up settings button
     const settingsButton = document.getElementById('settings-button');
     if (settingsButton) {
@@ -157,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'settings.html';
         });
     }
-    
+
     // Add initial welcome message
     setTimeout(() => {
         addMessage("Hello! I'm your AI assistant. How can I help you today?");
