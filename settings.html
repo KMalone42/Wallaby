@@ -190,6 +190,7 @@
         // Load settings when page loads
         window.addEventListener('load', async function() {
             try {
+                console.log('Loading settings...');
                 // Load all settings
                 const theme = await window.settings.getTheme();
                 const language = await window.settings.getLanguage();
@@ -215,6 +216,8 @@
                 document.getElementById('max-tokens').value = maxTokens;
                 document.getElementById('timeout').value = timeout;
                 
+                console.log('Settings loaded successfully');
+                
                 // Check if endpoint is saved and show banner if not
                 if (!ollamaEndpoint || ollamaEndpoint === 'http://localhost:11434') {
                     showBanner();
@@ -238,7 +241,7 @@
         
         // Save settings function
         async function saveSettings() {
-            console.log('settings API', window.settings);
+            console.log('Saving settings...');
             try {
                 const theme = document.getElementById('theme').value;
                 const language = document.getElementById('language').value;
@@ -268,6 +271,7 @@
                     hideBanner();
                 }
                 
+                console.log('Settings saved successfully');
                 alert('Settings saved successfully!');
             } catch (error) {
                 console.error('Error saving settings:', error);
@@ -290,16 +294,19 @@
         }
         
         function showBanner() {
+            console.log('Showing endpoint banner');
             document.getElementById('endpoint-banner').classList.add('show');
         }
         
         function hideBanner() {
+            console.log('Hiding endpoint banner');
             document.getElementById('endpoint-banner').classList.remove('show');
         }
         
         function saveEndpoint() {
             const endpoint = document.getElementById('banner-endpoint').value;
             if (endpoint) {
+                console.log('Saving endpoint:', endpoint);
                 window.settings.setOllamaBaseUrl(endpoint);
                 hideBanner();
             }
