@@ -190,44 +190,6 @@
     </div>
 
     <script>
-        // Ensure we have access to ipcRenderer
-        const { ipcRenderer } = require('electron');
-
-        // Make window.settings exist
-        window.settings = {
-          getTheme: () => ipcRenderer.invoke('settings:getTheme'),
-          setTheme: (v) => ipcRenderer.invoke('settings:setTheme', v),
-
-          getLanguage: () => ipcRenderer.invoke('settings:getLanguage'),
-          setLanguage: (v) => ipcRenderer.invoke('settings:setLanguage', v),
-
-          getModel: () => ipcRenderer.invoke('settings:getModel'),
-          setModel: (v) => ipcRenderer.invoke('settings:setModel', v),
-
-          getTemperature: () => ipcRenderer.invoke('settings:getTemperature'),
-          setTemperature: (v) => ipcRenderer.invoke('settings:setTemperature', v),
-
-          getSaveHistory: () => ipcRenderer.invoke('settings:getSaveHistory'),
-          setSaveHistory: (v) => ipcRenderer.invoke('settings:setSaveHistory', v),
-
-          getAutoSave: () => ipcRenderer.invoke('settings:getAutoSave'),
-          setAutoSave: (v) => ipcRenderer.invoke('settings:setAutoSave', v),
-
-          getAnalytics: () => ipcRenderer.invoke('settings:getAnalytics'),
-          setAnalytics: (v) => ipcRenderer.invoke('settings:setAnalytics', v),
-
-          getOllamaBaseUrl: () => ipcRenderer.invoke('settings:getOllamaBaseUrl'),
-          setOllamaBaseUrl: (v) => ipcRenderer.invoke('settings:setOllamaBaseUrl', v),
-
-          getMaxTokens: () => ipcRenderer.invoke('settings:getMaxTokens'),
-          setMaxTokens: (v) => ipcRenderer.invoke('settings:setMaxTokens', v),
-
-          getTimeout: () => ipcRenderer.invoke('settings:getTimeout'),
-          setTimeout: (v) => ipcRenderer.invoke('settings:setTimeout', v),
-
-          resetToDefaults: () => ipcRenderer.invoke('settings:resetToDefaults'),
-        };
-
         // Load settings when page loads
         window.addEventListener('load', async function() {
             try {
@@ -378,7 +340,44 @@
 
         // make sure it’s correct on first render
         setTempSliderVisible(tempEnable.checked);
+        window.addEventListener('DOMContentLoaded', async () => {
+          const tempEnable = document.getElementById('tempEnable');
+          const temperatureSlider = document.getElementById('temperatureSlider');
+          const temperature = document.getElementById('temperature');
+          const temperatureValue = document.getElementById('temperature-value');
 
+          function setTempSliderVisible(enabled) {
+            temperatureSlider.classList.toggle('is-open', enabled);
+            temperatureSlider.setAttribute('aria-hidden', String(!enabled));
+          }
+
+          // slider value text
+          temperature.addEventListener('input', () => {
+            temperatureValue.textContent = temperature.value;
+          });
+
+          // checkbox toggles visibility
+          tempEnable.addEventListener('change', () => {
+            setTempSliderVisible(tempEnable.checked);
+          });
+
+          // initial state: hidden until checked
+          setTempSliderVisible(tempEnable.checked);
+
+          // OPTIONAL: if you want it checked when a saved temperature exists
+          // (or when you later add a dedicated tempEnabled setting)
+          try {
+            const savedTemp = await window.settings.getTemperature();
+            temperature.value = savedTemp;
+            temperatureValue.textContent = savedTemp;
+
+            // if you want slider to appear automatically when temp exists:
+            // tempEnable.checked = true;
+            // setTempSliderVisible(true);
+          } catch (e) {
+            console.warn('Could not load temperature:', e);
+          }
+        });
     </script>
 </body>
 </html>
