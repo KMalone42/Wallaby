@@ -27,42 +27,36 @@ async function getSettings() {
   if (settingsLoaded && cachedSettings) {
     return cachedSettings;
   }
-
-  try {
-    if (typeof window.settings === 'undefined') {
-      console.warn('Settings API is not available, using defaults');
-      return {
-        ollamaBaseUrl: 'http://localhost:11434',
-        model: 'llama2',
-        temperature: 0.7,
-        maxTokens: 1000
-      };
+    try {
+        const settings = {
+            ollamaBaseUrl: await window.settings.getOllamaBaseUrl(),
+            model: await window.settings.getModel(),
+            temperature: await window.settings.getTemperature(),
+            maxTokens: await window.settings.getMaxTokens()
+        };
+        console.log('Using endpoint:', settings.ollamaBaseUrl);
+        console.log('Using model:', settings.model);
+        console.log('Using temperature:', settings.temperature);
+        console.log('Using maxTokens:', settings.maxTokens);
     }
-    
-    const settings = {
-      ollamaBaseUrl: await window.settings.getOllamaBaseUrl(),
-      model: await window.settings.getModel(),
-      temperature: await window.settings.getTemperature(),
-      maxTokens: await window.settings.getMaxTokens()
-    };
-    
+    catch (error) {
+        console.error('Error getting settings:', error);
+        // Return defaults if settings API fails
+        return {
+          ollamaBaseUrl: 'http://localhost:11434',
+          model: 'llama2',
+          temperature: 0.7,
+          maxTokens: 1000
+        };
+    }
     cachedSettings = settings;
     settingsLoaded = true;
     return settings;
-  } catch (error) {
-    console.error('Error getting settings:', error);
-    // Return defaults if settings API fails
-    return {
-      ollamaBaseUrl: 'http://localhost:11434',
-      model: 'llama2',
-      temperature: 0.7,
-      maxTokens: 1000
-    };
-  }
 }
 
 async function getAPIEndpoint() {
     try {
+        // This is the thing fucking me up
         // Ensure settings is available
         if (typeof window.settings === 'undefined') {
             console.warn('Settings API is not available, using default endpoint');

@@ -31,8 +31,8 @@ function createWindow() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true,
-      contextIsolation: false,
+      contextIsolation: true, // context bridging
+      nodeIntegration: false,
       partition: 'persist:wallaby',
     },
     icon: path.join(__dirname, 'icon.png')
