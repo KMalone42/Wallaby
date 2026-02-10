@@ -48,6 +48,37 @@
             background-color: #f44336;
             color: white;
         }
+        /* lets the label + toggle sit on one line */
+        .setting-item__top{
+          display:flex;
+          align-items:left;
+        }
+
+        /* collapsible panel */
+        .setting-panel{
+          display:none; /* default to not visible */
+          overflow:hidden;
+          max-height:0;
+          opacity:0;
+          transform: translateY(-6px);
+          transition: max-height 220ms ease, opacity 220ms ease, transform 220ms ease;
+          margin-top:10px;
+        } .setting-panel.is-open{ max-height:120px; /* increase if you add more stuff */
+          display:block;
+          opacity:1;
+          transform: translateY(0);
+        }
+
+        /* slider row layout */
+        .slider-row{
+          display:flex;
+          align-items:center;
+          gap:12px;
+        }
+
+        .slider-row input[type="range"]{
+          flex:1;
+        }
     </style>
 </head>
 <body>
@@ -86,20 +117,32 @@
                     <label for="model">Model</label>
                     <input type="text" id="model" placeholder="e.g., deepseek-r1:latest">
                 </div>
-
                 <div class="setting-item">
                     <label for="ollama-endpoint">Ollama API Endpoint</label>
                     <input type="text" id="ollama-endpoint" placeholder="e.g., http://localhost:11434">
                     <p class="help-text">Enter your Ollama API endpoint (e.g., http://localhost:11434)</p>
                 </div>
-                
-                <div class="setting-item">
+                <div class="setting-item setting-item--stack">
+                  <div class="setting-item__top">
                     <label for="temperature">Creativity Level</label>
-                    <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
-                    <span id="temperature-value">0.7</span>
+
+                    <label class="toggle">
+                      <input id="tempEnable" type="checkbox" />
+                      <span class="toggle-box" aria-hidden="true"></span>
+                      <span class="toggle-label">Enable</span>
+                    </label>
+                  </div>
+
+                  <div id="temperatureSlider" class="setting-panel" aria-hidden="true">
+                    <div class="slider-row">
+                      <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                      <span id="temperature-value">0.7</span>
+                    </div>
+                    <p class="help-text">Higher = more creative, lower = more deterministic.</p>
+                  </div>
                 </div>
             </div>
-            
+
             <div class="setting-group">
                 <h2>Advanced</h2>
                 <div class="setting-item">
@@ -251,6 +294,7 @@
                 const theme = document.getElementById('theme').value;
                 const language = document.getElementById('language').value;
                 const model = document.getElementById('model').value;
+                const tempEnabled = document.getElementById('tempEnable').checked;
                 const temperature = document.getElementById('temperature').value;
                 const saveHistory = document.getElementById('save-history').checked;
                 const autoSave = document.getElementById('auto-save').checked;
@@ -258,11 +302,13 @@
                 const ollamaEndpoint = document.getElementById('ollama-endpoint').value;
                 const maxTokens = document.getElementById('max-tokens').value;
                 const timeout = document.getElementById('timeout').value;
+
                 
                 // Save all settings
                 await call('theme', () => window.settings.setTheme(theme));
                 await call('language', () => window.settings.setLanguage(language));
                 await call('model', () => window.settings.setModel(model));
+                await call('tempEnabled', () => window.settings.setTempEnabled(tempEnabled));
                 await call('temperature', () => window.settings.setTemperature(temperature));
                 await call('saveHistory', () => window.settings.setSaveHistory(saveHistory));
                 await call('autoSave', () => window.settings.setAutoSave(autoSave));
@@ -316,6 +362,23 @@
                 hideBanner();
             }
         }
+
+        // Temperature Slider appear/disappear
+        const tempEnable = document.getElementById('tempEnable');
+        const temperatureSlider = document.getElementById('temperatureSlider');
+
+        function setTempSliderVisible(enabled) {
+          temperatureSlider.classList.toggle('is-open', enabled);
+          temperatureSlider.setAttribute('aria-hidden', String(!enabled));
+        }
+
+        tempEnable.addEventListener('change', () => {
+          setTempSliderVisible(tempEnable.checked);
+        });
+
+        // make sure it’s correct on first render
+        setTempSliderVisible(tempEnable.checked);
+
     </script>
 </body>
 </html>
