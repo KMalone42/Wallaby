@@ -5,6 +5,7 @@
     <title>Settings - AI Chat Assistant</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        /* same has header in styles*/
         .banner {
             position: fixed;
             top: 0;
@@ -50,13 +51,6 @@
     </style>
 </head>
 <body>
-    <div class="banner" id="endpoint-banner">
-        <span>Enter your Ollama API endpoint:</span>
-        <input type="text" id="banner-endpoint" placeholder="e.g., http://localhost:11434">
-        <button class="save-btn" onclick="saveEndpoint()">Save</button>
-        <button class="cancel-btn" onclick="hideBanner()">Cancel</button>
-    </div>
-    
     <div class="settings-container">
         <div class="settings-header">
             <h1>Settings</h1>
