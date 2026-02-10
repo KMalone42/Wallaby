@@ -84,12 +84,13 @@
                 <h2>AI Model</h2>
                 <div class="setting-item">
                     <label for="model">Model</label>
-                    <select id="model">
-                        <option value="gpt-3.5">GPT-3.5</option>
-                        <option value="gpt-4">GPT-4</option>
-                        <option value="claude">Claude</option>
-                        <option value="llama">Llama 2</option>
-                    </select>
+                    <input type="text" id="model" placeholder="e.g., deepseek-r1:latest">
+                </div>
+
+                <div class="setting-item">
+                    <label for="ollama-endpoint">Ollama API Endpoint</label>
+                    <input type="text" id="ollama-endpoint" placeholder="e.g., http://localhost:11434">
+                    <p class="help-text">Enter your Ollama API endpoint (e.g., http://localhost:11434)</p>
                 </div>
                 
                 <div class="setting-item">
@@ -99,6 +100,26 @@
                 </div>
             </div>
             
+            <div class="setting-group">
+                <h2>Advanced</h2>
+                <div class="setting-item">
+                    <label for="prepended-prompt">Prepend Prompt</label>
+                    <input type="text" id="prepended-prompt" placeholder="e.g., YOU ARE A SENIOR DEVELOPER">
+                </div>
+                <div class="setting-item">
+                    <label for="appended-prompt">Append Prompt</label>
+                    <input type="text" id="appended-prompt" placeholder="e.g., print 'moo' if you understand">
+                </div>
+                <div class="setting-item">
+                    <label for="max-tokens">Max Tokens</label>
+                    <input type="number" id="max-tokens" value="1000" min="100" max="4000">
+                </div>
+                <div class="setting-item">
+                    <label for="timeout">Timeout (seconds)</label>
+                    <input type="number" id="timeout" value="30" min="5" max="120">
+                </div>
+            </div>
+
             <div class="setting-group">
                 <h2>Privacy</h2>
                 <div class="setting-item checkbox">
@@ -117,24 +138,6 @@
                 </div>
             </div>
             
-            <div class="setting-group">
-                <h2>Advanced</h2>
-                <div class="setting-item">
-                    <label for="ollama-endpoint">Ollama API Endpoint</label>
-                    <input type="text" id="ollama-endpoint" placeholder="e.g., http://localhost:11434">
-                    <p class="help-text">Enter your Ollama API endpoint (e.g., http://localhost:11434)</p>
-                </div>
-                
-                <div class="setting-item">
-                    <label for="max-tokens">Max Tokens</label>
-                    <input type="number" id="max-tokens" value="1000" min="100" max="4000">
-                </div>
-                
-                <div class="setting-item">
-                    <label for="timeout">Timeout (seconds)</label>
-                    <input type="number" id="timeout" value="30" min="5" max="120">
-                </div>
-            </div>
         </div>
         
         <div class="settings-footer">
