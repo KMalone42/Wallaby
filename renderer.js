@@ -56,7 +56,7 @@ async function getSettings() {
 
 async function getAPIEndpoint() {
     try {
-        // Ensure settings is available
+        // Ensure settings is available getSettings should have returned settings by now.
         if (typeof window.settings === 'undefined') {
             console.warn('Settings API is not available, using default endpoint');
             return 'http://localhost:11434';
