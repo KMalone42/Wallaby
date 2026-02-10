@@ -56,7 +56,6 @@ async function getSettings() {
 
 async function getAPIEndpoint() {
     try {
-        // This is the thing fucking me up
         // Ensure settings is available
         if (typeof window.settings === 'undefined') {
             console.warn('Settings API is not available, using default endpoint');
@@ -116,6 +115,7 @@ async function callOllamaAPI(prompt) {
     }
 }
 
+// Triggers toolchain
 async function sendMessage() {
   console.log('sendMessage clicked');
   const messageInput = document.getElementById('message-input');
