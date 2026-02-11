@@ -5,6 +5,7 @@
     <title>Settings - AI Chat Assistant</title>
     <link rel="stylesheet" href="styles.css">
     <style>
+        /* same has header in styles*/
         .banner {
             position: fixed;
             top: 0;
@@ -47,16 +48,40 @@
             background-color: #f44336;
             color: white;
         }
+        /* lets the label + toggle sit on one line */
+        .setting-item__top{
+          display:flex;
+          align-items:left;
+        }
+
+        /* collapsible panel */
+        .setting-panel{
+          display:none; /* default to not visible */
+          overflow:hidden;
+          max-height:0;
+          opacity:0;
+          transform: translateY(-6px);
+          transition: max-height 220ms ease, opacity 220ms ease, transform 220ms ease;
+          margin-top:10px;
+        } .setting-panel.is-open{ max-height:120px; /* increase if you add more stuff */
+          display:block;
+          opacity:1;
+          transform: translateY(0);
+        }
+
+        /* slider row layout */
+        .slider-row{
+          display:flex;
+          align-items:center;
+          gap:12px;
+        }
+
+        .slider-row input[type="range"]{
+          flex:1;
+        }
     </style>
 </head>
 <body>
-    <div class="banner" id="endpoint-banner">
-        <span>Enter your Ollama API endpoint:</span>
-        <input type="text" id="banner-endpoint" placeholder="e.g., http://localhost:11434">
-        <button class="save-btn" onclick="saveEndpoint()">Save</button>
-        <button class="cancel-btn" onclick="hideBanner()">Cancel</button>
-    </div>
-    
     <div class="settings-container">
         <div class="settings-header">
             <h1>Settings</h1>
@@ -90,21 +115,54 @@
                 <h2>AI Model</h2>
                 <div class="setting-item">
                     <label for="model">Model</label>
-                    <select id="model">
-                        <option value="gpt-3.5">GPT-3.5</option>
-                        <option value="gpt-4">GPT-4</option>
-                        <option value="claude">Claude</option>
-                        <option value="llama">Llama 2</option>
-                    </select>
+                    <input type="text" id="model" placeholder="e.g., deepseek-r1:latest">
                 </div>
-                
                 <div class="setting-item">
+                    <label for="ollama-endpoint">Ollama API Endpoint</label>
+                    <input type="text" id="ollama-endpoint" placeholder="e.g., http://localhost:11434">
+                    <p class="help-text">Enter your Ollama API endpoint (e.g., http://localhost:11434)</p>
+                </div>
+                <div class="setting-item setting-item--stack">
+                  <div class="setting-item__top">
                     <label for="temperature">Creativity Level</label>
-                    <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
-                    <span id="temperature-value">0.7</span>
+
+                    <label class="toggle">
+                      <input id="tempEnable" type="checkbox" />
+                      <span class="toggle-box" aria-hidden="true"></span>
+                      <span class="toggle-label">Enable</span>
+                    </label>
+                  </div>
+
+                  <div id="temperatureSlider" class="setting-panel" aria-hidden="true">
+                    <div class="slider-row">
+                      <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                      <span id="temperature-value">0.7</span>
+                    </div>
+                    <p class="help-text">Higher = more creative, lower = more deterministic.</p>
+                  </div>
                 </div>
             </div>
-            
+
+            <div class="setting-group">
+                <h2>Advanced</h2>
+                <div class="setting-item">
+                    <label for="prepended-prompt">Prepend Prompt</label>
+                    <input type="text" id="prepended-prompt" placeholder="e.g., YOU ARE A SENIOR DEVELOPER">
+                </div>
+                <div class="setting-item">
+                    <label for="appended-prompt">Append Prompt</label>
+                    <input type="text" id="appended-prompt" placeholder="e.g., print 'moo' if you understand">
+                </div>
+                <div class="setting-item">
+                    <label for="max-tokens">Max Tokens</label>
+                    <input type="number" id="max-tokens" value="1000" min="100" max="4000">
+                </div>
+                <div class="setting-item">
+                    <label for="timeout">Timeout (seconds)</label>
+                    <input type="number" id="timeout" value="30" min="5" max="120">
+                </div>
+            </div>
+
             <div class="setting-group">
                 <h2>Privacy</h2>
                 <div class="setting-item checkbox">
@@ -123,24 +181,6 @@
                 </div>
             </div>
             
-            <div class="setting-group">
-                <h2>Advanced</h2>
-                <div class="setting-item">
-                    <label for="ollama-endpoint">Ollama API Endpoint</label>
-                    <input type="text" id="ollama-endpoint" placeholder="e.g., http://localhost:11434">
-                    <p class="help-text">Enter your Ollama API endpoint (e.g., http://localhost:11434)</p>
-                </div>
-                
-                <div class="setting-item">
-                    <label for="max-tokens">Max Tokens</label>
-                    <input type="number" id="max-tokens" value="1000" min="100" max="4000">
-                </div>
-                
-                <div class="setting-item">
-                    <label for="timeout">Timeout (seconds)</label>
-                    <input type="number" id="timeout" value="30" min="5" max="120">
-                </div>
-            </div>
         </div>
         
         <div class="settings-footer">
@@ -150,46 +190,10 @@
     </div>
 
     <script>
-        const { ipcRenderer } = require('electron');
-
-        // Make window.settings exist
-        window.settings = {
-          getTheme: () => ipcRenderer.invoke('settings:getTheme'),
-          setTheme: (v) => ipcRenderer.invoke('settings:setTheme', v),
-
-          getLanguage: () => ipcRenderer.invoke('settings:getLanguage'),
-          setLanguage: (v) => ipcRenderer.invoke('settings:setLanguage', v),
-
-          getModel: () => ipcRenderer.invoke('settings:getModel'),
-          setModel: (v) => ipcRenderer.invoke('settings:setModel', v),
-
-          getTemperature: () => ipcRenderer.invoke('settings:getTemperature'),
-          setTemperature: (v) => ipcRenderer.invoke('settings:setTemperature', v),
-
-          getSaveHistory: () => ipcRenderer.invoke('settings:getSaveHistory'),
-          setSaveHistory: (v) => ipcRenderer.invoke('settings:setSaveHistory', v),
-
-          getAutoSave: () => ipcRenderer.invoke('settings:getAutoSave'),
-          setAutoSave: (v) => ipcRenderer.invoke('settings:setAutoSave', v),
-
-          getAnalytics: () => ipcRenderer.invoke('settings:getAnalytics'),
-          setAnalytics: (v) => ipcRenderer.invoke('settings:setAnalytics', v),
-
-          getOllamaBaseUrl: () => ipcRenderer.invoke('settings:getOllamaBaseUrl'),
-          setOllamaBaseUrl: (v) => ipcRenderer.invoke('settings:setOllamaBaseUrl', v),
-
-          getMaxTokens: () => ipcRenderer.invoke('settings:getMaxTokens'),
-          setMaxTokens: (v) => ipcRenderer.invoke('settings:setMaxTokens', v),
-
-          getTimeout: () => ipcRenderer.invoke('settings:getTimeout'),
-          setTimeout: (v) => ipcRenderer.invoke('settings:setTimeout', v),
-
-          resetToDefaults: () => ipcRenderer.invoke('settings:resetToDefaults'),
-        };
-
         // Load settings when page loads
         window.addEventListener('load', async function() {
             try {
+                console.log('Loading settings...');
                 // Load all settings
                 const theme = await window.settings.getTheme();
                 const language = await window.settings.getLanguage();
@@ -215,20 +219,29 @@
                 document.getElementById('max-tokens').value = maxTokens;
                 document.getElementById('timeout').value = timeout;
                 
+                console.log('Settings loaded successfully');
+                
                 // Check if endpoint is saved and show banner if not
                 if (!ollamaEndpoint || ollamaEndpoint === 'http://localhost:11434') {
                     showBanner();
                 }
             } catch (error) {
                 console.error('Error loading settings:', error);
+                // Show banner if we can't load settings
+                showBanner();
             }
         });
 
         async function call(name, fn) {
           console.log(`→ saving ${name}`);
-          const result = await fn();
-          console.log(`✓ saved ${name}`, result);
-          return result;
+          try {
+            const result = await fn();
+            console.log(`✓ saved ${name}`, result);
+            return result;
+          } catch (error) {
+            console.error(`Error saving ${name}:`, error);
+            throw error;
+          }
         }
         
         // Update temperature value display
@@ -238,11 +251,12 @@
         
         // Save settings function
         async function saveSettings() {
-            console.log('settings API', window.settings);
+            console.log('Saving settings...');
             try {
                 const theme = document.getElementById('theme').value;
                 const language = document.getElementById('language').value;
                 const model = document.getElementById('model').value;
+                const tempEnabled = document.getElementById('tempEnable').checked;
                 const temperature = document.getElementById('temperature').value;
                 const saveHistory = document.getElementById('save-history').checked;
                 const autoSave = document.getElementById('auto-save').checked;
@@ -250,11 +264,13 @@
                 const ollamaEndpoint = document.getElementById('ollama-endpoint').value;
                 const maxTokens = document.getElementById('max-tokens').value;
                 const timeout = document.getElementById('timeout').value;
+
                 
                 // Save all settings
                 await call('theme', () => window.settings.setTheme(theme));
                 await call('language', () => window.settings.setLanguage(language));
                 await call('model', () => window.settings.setModel(model));
+                await call('tempEnabled', () => window.settings.setTempEnabled(tempEnabled));
                 await call('temperature', () => window.settings.setTemperature(temperature));
                 await call('saveHistory', () => window.settings.setSaveHistory(saveHistory));
                 await call('autoSave', () => window.settings.setAutoSave(autoSave));
@@ -268,6 +284,7 @@
                     hideBanner();
                 }
                 
+                console.log('Settings saved successfully');
                 alert('Settings saved successfully!');
             } catch (error) {
                 console.error('Error saving settings:', error);
@@ -290,20 +307,77 @@
         }
         
         function showBanner() {
+            console.log('Showing endpoint banner');
             document.getElementById('endpoint-banner').classList.add('show');
         }
         
         function hideBanner() {
+            console.log('Hiding endpoint banner');
             document.getElementById('endpoint-banner').classList.remove('show');
         }
         
         function saveEndpoint() {
             const endpoint = document.getElementById('banner-endpoint').value;
             if (endpoint) {
+                console.log('Saving endpoint:', endpoint);
                 window.settings.setOllamaBaseUrl(endpoint);
                 hideBanner();
             }
         }
+
+        // Temperature Slider appear/disappear
+        const tempEnable = document.getElementById('tempEnable');
+        const temperatureSlider = document.getElementById('temperatureSlider');
+
+        function setTempSliderVisible(enabled) {
+          temperatureSlider.classList.toggle('is-open', enabled);
+          temperatureSlider.setAttribute('aria-hidden', String(!enabled));
+        }
+
+        tempEnable.addEventListener('change', () => {
+          setTempSliderVisible(tempEnable.checked);
+        });
+
+        // make sure it’s correct on first render
+        setTempSliderVisible(tempEnable.checked);
+        window.addEventListener('DOMContentLoaded', async () => {
+          const tempEnable = document.getElementById('tempEnable');
+          const temperatureSlider = document.getElementById('temperatureSlider');
+          const temperature = document.getElementById('temperature');
+          const temperatureValue = document.getElementById('temperature-value');
+
+          function setTempSliderVisible(enabled) {
+            temperatureSlider.classList.toggle('is-open', enabled);
+            temperatureSlider.setAttribute('aria-hidden', String(!enabled));
+          }
+
+          // slider value text
+          temperature.addEventListener('input', () => {
+            temperatureValue.textContent = temperature.value;
+          });
+
+          // checkbox toggles visibility
+          tempEnable.addEventListener('change', () => {
+            setTempSliderVisible(tempEnable.checked);
+          });
+
+          // initial state: hidden until checked
+          setTempSliderVisible(tempEnable.checked);
+
+          // OPTIONAL: if you want it checked when a saved temperature exists
+          // (or when you later add a dedicated tempEnabled setting)
+          try {
+            const savedTemp = await window.settings.getTemperature();
+            temperature.value = savedTemp;
+            temperatureValue.textContent = savedTemp;
+
+            // if you want slider to appear automatically when temp exists:
+            // tempEnable.checked = true;
+            // setTempSliderVisible(true);
+          } catch (e) {
+            console.warn('Could not load temperature:', e);
+          }
+        });
     </script>
 </body>
 </html>

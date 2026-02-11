@@ -30,8 +30,9 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true, // context bridging
+      nodeIntegration: false,
       partition: 'persist:wallaby',
     },
     icon: path.join(__dirname, 'icon.png')
@@ -43,20 +44,7 @@ function createWindow() {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   }
   
-  // Create menu
-  const menuTemplate = [
-    {
-      label: 'Menu',
-      submenu: [
-        { label: 'Settings', click: () => mainWindow.loadFile('settings.html') },
-        { type: 'separator' },
-        { label: 'Quit', click: () => app.quit() }
-      ]
-    }
-  ];
-  
-  const menu = Menu.buildFromTemplate(menuTemplate);
-  Menu.setApplicationMenu(menu);
+  Menu.setApplicationMenu(null);
 }
 
 app.whenReady().then(createWindow);

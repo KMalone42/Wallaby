@@ -1,29 +1,64 @@
 // renderer.js
-import { ipcRenderer } from 'electron';
 
 function addMessage(content, isUser = false) {
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
-    
-    const time = new Date();
-    const timeString = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
-    messageDiv.innerHTML = `
-        <div class="message-content">${content}</div>
-        <div class="message-time">${timeString}</div>
-    `;
-    
-    document.querySelector('.chat-container').appendChild(messageDiv);
-    
-    // Scroll to bottom
-    document.querySelector('.chat-container').scrollTop = document.querySelector('.chat-container').scrollHeight;
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+
+  const time = new Date();
+  const timeString = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  messageDiv.innerHTML = `
+    <div class="message-content">${content}</div>
+    <div class="message-time">${timeString}</div>
+  `;
+
+  const chat = document.querySelector('.chat-container');
+  chat.appendChild(messageDiv);
+  chat.scrollTop = chat.scrollHeight;
+
+  return messageDiv; // ✅ IMPORTANT
+}
+
+// Cache for settings to avoid repeated API calls
+let cachedSettings = null;
+let settingsLoaded = false;
+
+async function getSettings() {
+  if (settingsLoaded && cachedSettings) {
+    return cachedSettings;
+  }
+    try {
+        const settings = {
+            ollamaBaseUrl: await window.settings.getOllamaBaseUrl(),
+            model: await window.settings.getModel(),
+            temperature: await window.settings.getTemperature(),
+            maxTokens: await window.settings.getMaxTokens()
+        };
+        console.log('Using endpoint:', settings.ollamaBaseUrl);
+        console.log('Using model:', settings.model);
+        console.log('Using temperature:', settings.temperature);
+        console.log('Using maxTokens:', settings.maxTokens);
+    }
+    catch (error) {
+        console.error('Error getting settings:', error);
+        // Return defaults if settings API fails
+        return {
+          ollamaBaseUrl: 'http://localhost:11434',
+          model: 'llama2',
+          temperature: 0.7,
+          maxTokens: 1000
+        };
+    }
+    cachedSettings = settings;
+    settingsLoaded = true;
+    return settings;
 }
 
 async function getAPIEndpoint() {
     try {
-        // Ensure settings is available
+        // Ensure settings is available getSettings should have returned settings by now.
         if (typeof window.settings === 'undefined') {
-            console.error('Settings API is not available');
+            console.warn('Settings API is not available, using default endpoint');
             return 'http://localhost:11434';
         }
         
@@ -37,24 +72,28 @@ async function getAPIEndpoint() {
         return 'http://localhost:11434';
     } catch (error) {
         console.error('Error getting API endpoint:', error);
+        // Even if there's an error, return default endpoint
         return 'http://localhost:11434';
     }
 }
 
 async function callOllamaAPI(prompt) {
     try {
+        const settings = await getSettings();
         const endpoint = await getAPIEndpoint();
+        console.log('Using endpoint:', endpoint);
+        
         const response = await fetch(`${endpoint}/api/generate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'llama2', // Default model, can be made configurable
+                model: settings.model || 'llama2',
                 prompt: prompt,
                 stream: false,
-                temperature: 0.7,
-                max_tokens: 1000
+                temperature: settings.temperature || 0.7,
+                max_tokens: settings.maxTokens || 1000
             })
         });
         
@@ -66,34 +105,36 @@ async function callOllamaAPI(prompt) {
         return data.response;
     } catch (error) {
         console.error('Error calling Ollama API:', error);
+        
+        // Show a more helpful error message to the user
+        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+            throw new Error('Could not connect to Ollama API. Please ensure Ollama is running and accessible at the configured endpoint.');
+        }
+        
         throw error;
     }
 }
 
+// Triggers toolchain
 async function sendMessage() {
-    const messageInput = document.getElementById('message-input');
-    const message = messageInput.value.trim();
-    if (message) {
-        // Add user message
-        addMessage(message, true);
-        messageInput.value = '';
-        
-        // Show thinking indicator
-        const thinkingMessage = addMessage("Thinking...", false);
-        
-        try {
-            const response = await callOllamaAPI(message);
-            // Remove thinking indicator
-            document.querySelector('.chat-container').removeChild(thinkingMessage);
-            // Add AI response
-            addMessage(response, false);
-        } catch (error) {
-            // Remove thinking indicator
-            document.querySelector('.chat-container').removeChild(thinkingMessage);
-            // Add error message
-            addMessage(`Error: ${error.message}`, false);
-        }
-    }
+  console.log('sendMessage clicked');
+  const messageInput = document.getElementById('message-input');
+  const message = messageInput.value.trim();
+  if (!message) return;
+
+  addMessage(message, true);
+  messageInput.value = '';
+
+  const thinkingNode = addMessage("Thinking...", false);
+
+  try {
+    const response = await callOllamaAPI(message);
+    thinkingNode.remove();
+    addMessage(response, false);
+  } catch (error) {
+    thinkingNode.remove();
+    addMessage(`Error: ${error.message}`, false);
+  }
 }
 
 function showPopup(message) {
@@ -137,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sendButton) {
         sendButton.addEventListener('click', sendMessage);
     }
-    
+
     const messageInput = document.getElementById('message-input');
     if (messageInput) {
         messageInput.addEventListener('keypress', (e) => {
@@ -146,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Set up settings button
     const settingsButton = document.getElementById('settings-button');
     if (settingsButton) {
@@ -155,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'settings.html';
         });
     }
-    
+
     // Add initial welcome message
     setTimeout(() => {
         addMessage("Hello! I'm your AI assistant. How can I help you today?");

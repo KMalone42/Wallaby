@@ -2,7 +2,7 @@
   "name": "wallaby",
   "version": "1.0.0",
   "description": "a robust electron client for Ollama and other generic llm applications",
-  "main": "main.js",
+  "main": "src/main.js",
   "type": "module",
   "scripts": {
     "start": "electron .",
