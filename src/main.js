@@ -38,7 +38,7 @@ function createWindow() {
     icon: path.join(__dirname, 'icon.png')
   });
 
-  mainWindow.loadFile('index.html');
+  mainWindow.loadFile('src/front/pages/index.html'); // entry frontpage
 
   if (!app.isPackaged) {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
