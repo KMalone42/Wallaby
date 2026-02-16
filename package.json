@@ -1,19 +1,20 @@
 {
-  "name": "wallaby",
+  "name": "chat-app",
   "version": "1.0.0",
-  "description": "a robust electron client for Ollama and other generic llm applications",
+  "description": "Chat application with Ollama integration",
   "main": "src/main.js",
-  "type": "module",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
-  "keywords": [
-    "Electron"
-  ],
-  "author": "kmalone",
-  "license": "MIT",
   "dependencies": {
-    "electron-store": "^11.0.2"
+    "electron": "^24.0.0",
+    "electron-store": "^8.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jsdom": "^20.0.0"
   }
 }
