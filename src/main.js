@@ -1,4 +1,4 @@
-// main.js
+// main.js (ESM)
 import { app, BrowserWindow, Menu, ipcMain, nativeTheme } from 'electron';
 import path from 'path';
 import Store from 'electron-store';
@@ -30,9 +30,10 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true, // context bridging
       nodeIntegration: false,
+      sandbox: false, // for renderer modules
       partition: 'persist:wallaby',
     },
     icon: path.join(__dirname, 'icon.png')

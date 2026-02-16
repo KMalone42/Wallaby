@@ -1,4 +1,23 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const commonmark = require("commonmark");
+const createDOMPurify = require("dompurify");
+
+// CommonMark pipeline
+const parser = new commonmark.Parser();
+const renderer = new commonmark.HtmlRenderer({ safe: false });
+
+// DOMPurify needs a Window-like object. In preload you have `window`.
+const DOMPurify = createDOMPurify(window);
+
+function renderMarkdownToSafeHtml(mdText) {
+  const doc = parser.parse(String(mdText ?? ""));
+  const rawHtml = renderer.render(doc);
+  return DOMPurify.sanitize(rawHtml, { USE_PROFILES: { html: true } });
+}
+
+contextBridge.exposeInMainWorld("markdown", {
+  render: renderMarkdownToSafeHtml,
+});
 
 contextBridge.exposeInMainWorld('api', {
   send: (channel, data) => ipcRenderer.send(channel, data),

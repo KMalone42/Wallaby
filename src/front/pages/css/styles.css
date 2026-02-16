@@ -148,6 +148,33 @@ body {
     margin-top: 5px;
 }
 
+
+/* Inline code */
+.message-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.95em;
+  padding: 0.15em 0.35em;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Block code */
+.message-content pre {
+  margin: 10px 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  overflow: auto;
+}
+
+.message-content pre code {
+  padding: 0;              /* don't double-pad inside pre */
+  background: transparent; /* let pre handle background */
+  display: block;
+  white-space: pre;        /* keep spacing */
+}
+
+
 .input-container {
     display: flex;
     padding: 15px;

@@ -29,6 +29,7 @@ async function updateHeaderTitle() {
   }
 }
 
+// Handles all message rendering basically, uses commonmark and dompurify
 function addMessage(content, isUser = false) {
   const messageDiv = document.createElement('div');
   messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
@@ -36,17 +37,30 @@ function addMessage(content, isUser = false) {
   const time = new Date();
   const timeString = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  messageDiv.innerHTML = `
-    <div class="message-content">${content}</div>
-    <div class="message-time">${timeString}</div>
-  `;
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'message-content';
+
+  if (isUser) {
+    contentDiv.textContent = content; // user = plain text
+  } else {
+    contentDiv.innerHTML = window.markdown.render(content); // AI = markdown -> safe html
+  }
+
+  const timeDiv = document.createElement('div');
+  timeDiv.className = 'message-time';
+  timeDiv.textContent = timeString;
+
+  messageDiv.appendChild(contentDiv);
+  messageDiv.appendChild(timeDiv);
 
   const chat = document.querySelector('.chat-container');
   chat.appendChild(messageDiv);
   chat.scrollTop = chat.scrollHeight;
 
-  return messageDiv; // ✅ IMPORTANT
+  return messageDiv;
 }
+
+
 
 // Cache for settings to avoid repeated API calls
 let cachedSettings = null;
