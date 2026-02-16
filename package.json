@@ -5,8 +5,13 @@
   "main": "src/main.js",
   "type": "module",
   "scripts": {
-    "start": "electron .",
+    "dev:renderer": "vite --config vite.renderer.config.js",
+    "build:renderer": "vite build --config vite.renderer.config.js",
+    "build:preload": "vite build --config vite.preload.config.js",
+    "build": "npm run build:preload && npm run build:renderer",
+    "start": "npm run build && electron ."
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
   },
   "keywords": [
     "Electron"
@@ -14,6 +19,11 @@
   "author": "kmalone",
   "license": "MIT",
   "dependencies": {
-    "electron-store": "^11.0.2"
+    "dompurify": "^3.3.1",
+    "electron-store": "^11.0.2",
+    "marked": "^17.0.2"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
   }
 }

@@ -4,6 +4,8 @@ import path from 'path';
 import Store from 'electron-store';
 import { fileURLToPath } from 'url';
 
+//const path = require('path');
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -30,7 +32,7 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true, // context bridging
       nodeIntegration: false,
       partition: 'persist:wallaby',
@@ -38,7 +40,8 @@ function createWindow() {
     icon: path.join(__dirname, 'icon.png')
   });
 
-  mainWindow.loadFile('src/front/pages/index.html'); // entry frontpage
+  // mainWindow.loadFile('src/front/pages/index.html'); // entry frontpage
+  mainWindow.loadFile(path.join(__dirname, "front", "pages", "index.html"));
 
   if (!app.isPackaged) {
     mainWindow.webContents.openDevTools({ mode: 'detach' });

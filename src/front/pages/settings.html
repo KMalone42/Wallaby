@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <style>
         /* same has header in styles*/
+        /*
         .banner {
             position: fixed;
             top: 0;
@@ -48,6 +49,8 @@
             background-color: #f44336;
             color: white;
         }
+        */
+
         /* lets the label + toggle sit on one line */
         .setting-item__top{
           display:flex;
@@ -82,8 +85,8 @@
     </style>
 </head>
 <body>
-    <div class="settings-container">
-        <div class="settings-header">
+    <div class="container">
+        <div class="container-header">
             <h1>Settings</h1>
             <button class="back-button" onclick="window.location.href='index.html'">Back to Chat</button>
         </div>
@@ -221,10 +224,6 @@
                 
                 console.log('Settings loaded successfully');
                 
-                // Check if endpoint is saved and show banner if not
-                if (!ollamaEndpoint || ollamaEndpoint === 'http://localhost:11434') {
-                    showBanner();
-                }
             } catch (error) {
                 console.error('Error loading settings:', error);
                 // Show banner if we can't load settings

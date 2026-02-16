@@ -1,4 +1,4 @@
-// renderer.js
+// index.page.js
 
 async function updateHeaderTitle() {
   try {
@@ -29,6 +29,7 @@ async function updateHeaderTitle() {
   }
 }
 
+
 function addMessage(content, isUser = false) {
   const messageDiv = document.createElement('div');
   messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
@@ -36,10 +37,24 @@ function addMessage(content, isUser = false) {
   const time = new Date();
   const timeString = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  messageDiv.innerHTML = `
-    <div class="message-content">${content}</div>
-    <div class="message-time">${timeString}</div>
-  `;
+  // build nodes safely
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'message-content';
+
+  if (isUser) {
+    // user text should always be plain text
+    contentDiv.textContent = content;
+  } else {
+    // AI text: markdown -> sanitized html (via preload bridge)
+    contentDiv.innerHTML = window.markdown.render(content);
+  }
+
+  const timeDiv = document.createElement('div');
+  timeDiv.className = 'message-time';
+  timeDiv.textContent = timeString;
+
+  messageDiv.appendChild(contentDiv);
+  messageDiv.appendChild(timeDiv);
 
   const chat = document.querySelector('.chat-container');
   chat.appendChild(messageDiv);
