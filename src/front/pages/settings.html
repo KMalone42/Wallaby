@@ -6,48 +6,6 @@
     <link rel="stylesheet" href="css/styles.css">
     <style>
         /* same has header in styles*/
-        .banner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #333;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            z-index: 1000;
-            display: none;
-        }
-        
-        .banner.show {
-            display: block;
-        }
-        
-        .banner input {
-            padding: 8px;
-            margin: 0 10px;
-            border: none;
-            border-radius: 4px;
-            width: 300px;
-        }
-        
-        .banner button {
-            padding: 8px 15px;
-            margin: 0 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .banner .save-btn {
-            background-color: #4CAF50;
-            color: white;
-        }
-        
-        .banner .cancel-btn {
-            background-color: #f44336;
-            color: white;
-        }
         /* lets the label + toggle sit on one line */
         .setting-item__top{
           display:flex;
@@ -82,8 +40,8 @@
     </style>
 </head>
 <body>
-    <div class="settings-container">
-        <div class="settings-header">
+    <div class="container">
+        <div class="container-header">
             <h1>Settings</h1>
             <button class="back-button" onclick="window.location.href='index.html'">Back to Chat</button>
         </div>
@@ -222,9 +180,6 @@
                 console.log('Settings loaded successfully');
                 
                 // Check if endpoint is saved and show banner if not
-                if (!ollamaEndpoint || ollamaEndpoint === 'http://localhost:11434') {
-                    showBanner();
-                }
             } catch (error) {
                 console.error('Error loading settings:', error);
                 // Show banner if we can't load settings

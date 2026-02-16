@@ -1,4 +1,4 @@
-// renderer.js
+// index.page.js
 
 async function updateHeaderTitle() {
   try {
