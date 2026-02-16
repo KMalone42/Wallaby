@@ -1,5 +1,34 @@
 // renderer.js
 
+async function updateHeaderTitle() {
+  try {
+    const model = await window.settings.getModel();
+    const endpoint = await window.settings.getOllamaBaseUrl();
+
+    let hostname = "hostname";
+    let modelName = "model";
+
+    if (endpoint) {
+      const match = endpoint.match(/\/\/([^:]+)/);
+      if (match && match[1]) {
+        hostname = match[1];
+      }
+    }
+
+    if (model) {
+      modelName = model.split(":")[0]; // drop :latest etc
+    }
+
+    const titleElement = document.getElementById("chat-title");
+    if (titleElement) {
+      titleElement.textContent = `${modelName}@${hostname}`;
+    }
+
+  } catch (err) {
+    console.error("Failed to update header title:", err);
+  }
+}
+
 function addMessage(content, isUser = false) {
   const messageDiv = document.createElement('div');
   messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
@@ -155,6 +184,9 @@ function showPopup(message) {
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
+    // Setup header
+    updateHeaderTitle();
+
     // Set up event listeners
     const sendButton = document.getElementById('send-button');
     if (sendButton) {
@@ -181,6 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add initial welcome message
     setTimeout(() => {
-        addMessage("Hello! I'm your AI assistant. How can I help you today?");
+        addMessage("This is the beginning of a new chat.");
     }, 500);
 });
