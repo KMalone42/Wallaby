@@ -208,6 +208,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const messageInput = document.getElementById('message-input');
+
+    function autosize(el) {
+        el.style.height = "auto";
+        el.style.height = Math.min(el.scrollHeight, 160) + "px"; // 160px cap
+    }
+
+    messageInput.addEventListener("input", () => autosize(messageInput));
+    autosize(messageInput);
+
     if (messageInput) {
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {

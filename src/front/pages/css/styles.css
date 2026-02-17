@@ -182,11 +182,24 @@ body {
     gap: 10px;
 }
 
+.container-footer {
+    display: flex;
+    padding: 15px;
+    border-top: 1px solid #1d2021;
+    gap: 10px;
+}
+
 #message-input {
-    flex: 1;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 3em;
+    max-height: 10em;
+    overflow-y: auto;
     padding: 12px 15px;
     border: 1px solid #458588; /* blue */
     border-radius: 25px;
+    max-width: 100%;
+    resize: none;
     font-size: 1rem;
     outline: none;
     transition: border-color 0.3s;
@@ -297,6 +310,7 @@ body {
     flex: 1;
     padding: 20px;
     overflow-y: auto;
+    color: white;
 }
 
 .setting-group {
@@ -306,9 +320,9 @@ body {
 .setting-group h2 {
     font-size: 1.2rem;
     margin-bottom: 15px;
-    color: #182848;
+    color: white;
     padding-bottom: 8px;
-    border-bottom: 2px solid #4b6cb7;
+    border-bottom: 2px solid #458588; /* blue */
 }
 
 .setting-item {
@@ -320,17 +334,20 @@ body {
 .setting-item label {
     margin-bottom: 5px;
     font-weight: 500;
-    color: #444;
+    color: white;
 }
 
 .setting-item input[type="text"],
 .setting-item input[type="number"],
 .setting-item select {
+    flex: 1;
     padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    border: 1px solid #458588; /* blue */
+    border-radius: 25px;
     font-size: 1rem;
     transition: border-color 0.3s;
+    background-color: #3c3836; /* bg1 */
+    color: white;
 }
 
 .setting-item input[type="text"]:focus,
@@ -389,12 +406,12 @@ body {
 }
 
 .reset-button {
-    background: #f44336;
+    background: #458588; /* blue */
     color: white;
 }
 
 .save-button {
-    background: linear-gradient(to right, #4b6cb7, #182848);
+    background: #cc241d; /* red */
     color: white;
 }
 
