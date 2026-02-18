@@ -99,6 +99,12 @@ ipcMain.handle('settings:setAutoSave', (_, autoSave) =>
 ipcMain.handle('settings:setAnalytics', (_, analytics) =>
   logSet('analytics', analytics)
 );
+ipcMain.handle('settings:setPrependPrompt', (_, prependPrompt) =>
+  logSet('prependPrompt', prependPrompt)
+);
+ipcMain.handle('settings:setAppendPrompt', (_, appendPrompt) =>
+  logSet('appendPrompt', appendPrompt)
+);
 ipcMain.handle('settings:setMaxTokens', (_, maxTokens) =>
   logSet('maxTokens', maxTokens)
 );
@@ -146,11 +152,9 @@ ipcMain.handle('settings:getAutoSave', () => {
 ipcMain.handle('settings:getAnalytics', () => {
   return store.get('analytics');
 });
-
-ipcMain.handle('settings:getMaxTokens', () => {
-  return store.get('maxTokens');
-});
-
+ipcMain.handle('settings:getPrependPrompt', () => { return store.get('prependPrompt'); });
+ipcMain.handle('settings:getAppendPrompt',  () => { return store.get('appendPrompt'); });
+ipcMain.handle('settings:getMaxTokens',     () => { return store.get('maxTokens'); });
 ipcMain.handle('settings:getTimeout', () => {
   return store.get('timeout');
 });

@@ -104,12 +104,12 @@
             <div class="setting-group">
                 <h2>Advanced</h2>
                 <div class="setting-item">
-                    <label for="prepended-prompt">Prepend Prompt</label>
-                    <input type="text" id="prepended-prompt" placeholder="e.g., YOU ARE A SENIOR DEVELOPER">
+                    <label for="prependPrompt">Prepend Prompt</label>
+                    <input type="text" id="prependPrompt" placeholder="e.g., YOU ARE A SENIOR DEVELOPER">
                 </div>
                 <div class="setting-item">
-                    <label for="appended-prompt">Append Prompt</label>
-                    <input type="text" id="appended-prompt" placeholder="e.g., print 'moo' if you understand">
+                    <label for="appendPrompt">Append Prompt</label>
+                    <input type="text" id="appendPrompt" placeholder="e.g., print 'moo' if you understand">
                 </div>
                 <div class="setting-item">
                     <label for="max-tokens">Max Tokens</label>
@@ -142,197 +142,10 @@
         </div>
         
         <div class="container-footer">
-            <button class="reset-button" onclick="resetToDefaults()">Reset to Defaults</button>
-            <button class="save-button" onclick="saveSettings()">Save Settings</button>
+            <button class="reset-button">Reset to Defaults</button>
+            <button class="save-button">Save Settings</button>
         </div>
     </div>
-
-    <script>
-        // Load settings when page loads
-        window.addEventListener('load', async function() {
-            try {
-                console.log('Loading settings...');
-                // Load all settings
-                const theme = await window.settings.getTheme();
-                const language = await window.settings.getLanguage();
-                const model = await window.settings.getModel();
-                const temperature = await window.settings.getTemperature();
-                const saveHistory = await window.settings.getSaveHistory();
-                const autoSave = await window.settings.getAutoSave();
-                const analytics = await window.settings.getAnalytics();
-                const ollamaEndpoint = await window.settings.getOllamaBaseUrl();
-                const maxTokens = await window.settings.getMaxTokens();
-                const timeout = await window.settings.getTimeout();
-                
-                // Set values in UI
-                document.getElementById('theme').value = theme;
-                document.getElementById('language').value = language;
-                document.getElementById('model').value = model;
-                document.getElementById('temperature').value = temperature;
-                document.getElementById('temperature-value').textContent = temperature;
-                document.getElementById('save-history').checked = saveHistory;
-                document.getElementById('auto-save').checked = autoSave;
-                document.getElementById('analytics').checked = analytics;
-                document.getElementById('ollama-endpoint').value = ollamaEndpoint;
-                document.getElementById('max-tokens').value = maxTokens;
-                document.getElementById('timeout').value = timeout;
-                
-                console.log('Settings loaded successfully');
-                
-                // Check if endpoint is saved and show banner if not
-            } catch (error) {
-                console.error('Error loading settings:', error);
-                // Show banner if we can't load settings
-                showBanner();
-            }
-        });
-
-        async function call(name, fn) {
-          console.log(`→ saving ${name}`);
-          try {
-            const result = await fn();
-            console.log(`✓ saved ${name}`, result);
-            return result;
-          } catch (error) {
-            console.error(`Error saving ${name}:`, error);
-            throw error;
-          }
-        }
-        
-        // Update temperature value display
-        document.getElementById('temperature').addEventListener('input', function() {
-            document.getElementById('temperature-value').textContent = this.value;
-        });
-        
-        // Save settings function
-        async function saveSettings() {
-            console.log('Saving settings...');
-            try {
-                const theme = document.getElementById('theme').value;
-                const language = document.getElementById('language').value;
-                const model = document.getElementById('model').value;
-                const tempEnabled = document.getElementById('tempEnable').checked;
-                const temperature = document.getElementById('temperature').value;
-                const saveHistory = document.getElementById('save-history').checked;
-                const autoSave = document.getElementById('auto-save').checked;
-                const analytics = document.getElementById('analytics').checked;
-                const ollamaEndpoint = document.getElementById('ollama-endpoint').value;
-                const maxTokens = document.getElementById('max-tokens').value;
-                const timeout = document.getElementById('timeout').value;
-
-                
-                // Save all settings
-                await call('theme', () => window.settings.setTheme(theme));
-                await call('language', () => window.settings.setLanguage(language));
-                await call('model', () => window.settings.setModel(model));
-                await call('tempEnabled', () => window.settings.setTempEnabled(tempEnabled));
-                await call('temperature', () => window.settings.setTemperature(temperature));
-                await call('saveHistory', () => window.settings.setSaveHistory(saveHistory));
-                await call('autoSave', () => window.settings.setAutoSave(autoSave));
-                await call('analytics', () => window.settings.setAnalytics(analytics));
-                await call('ollamaBaseUrl', () => window.settings.setOllamaBaseUrl(ollamaEndpoint));
-                await call('maxTokens', () => window.settings.setMaxTokens(maxTokens));
-                await call('timeout', () => window.settings.setTimeout(timeout));
-                
-                // Hide banner if endpoint was saved
-                if (ollamaEndpoint) {
-                    hideBanner();
-                }
-                
-                console.log('Settings saved successfully');
-                alert('Settings saved successfully!');
-            } catch (error) {
-                console.error('Error saving settings:', error);
-                alert('Error saving settings');
-            }
-        }
-        
-        // Reset to defaults
-        async function resetToDefaults() {
-            if (confirm('Are you sure you want to reset all settings to defaults?')) {
-                try {
-                    await window.settings.resetToDefaults();
-                    // Reload page to apply defaults
-                    window.location.reload();
-                } catch (error) {
-                    console.error('Error resetting settings:', error);
-                    alert('Error resetting settings');
-                }
-            }
-        }
-        
-        function showBanner() {
-            console.log('Showing endpoint banner');
-            document.getElementById('endpoint-banner').classList.add('show');
-        }
-        
-        function hideBanner() {
-            console.log('Hiding endpoint banner');
-            document.getElementById('endpoint-banner').classList.remove('show');
-        }
-        
-        function saveEndpoint() {
-            const endpoint = document.getElementById('banner-endpoint').value;
-            if (endpoint) {
-                console.log('Saving endpoint:', endpoint);
-                window.settings.setOllamaBaseUrl(endpoint);
-                hideBanner();
-            }
-        }
-
-        // Temperature Slider appear/disappear
-        const tempEnable = document.getElementById('tempEnable');
-        const temperatureSlider = document.getElementById('temperatureSlider');
-
-        function setTempSliderVisible(enabled) {
-          temperatureSlider.classList.toggle('is-open', enabled);
-          temperatureSlider.setAttribute('aria-hidden', String(!enabled));
-        }
-
-        tempEnable.addEventListener('change', () => {
-          setTempSliderVisible(tempEnable.checked);
-        });
-
-        // make sure it’s correct on first render
-        setTempSliderVisible(tempEnable.checked);
-        window.addEventListener('DOMContentLoaded', async () => {
-          const tempEnable = document.getElementById('tempEnable');
-          const temperatureSlider = document.getElementById('temperatureSlider');
-          const temperature = document.getElementById('temperature');
-          const temperatureValue = document.getElementById('temperature-value');
-
-          function setTempSliderVisible(enabled) {
-            temperatureSlider.classList.toggle('is-open', enabled);
-            temperatureSlider.setAttribute('aria-hidden', String(!enabled));
-          }
-
-          // slider value text
-          temperature.addEventListener('input', () => {
-            temperatureValue.textContent = temperature.value;
-          });
-
-          // checkbox toggles visibility
-          tempEnable.addEventListener('change', () => {
-            setTempSliderVisible(tempEnable.checked);
-          });
-
-          // initial state: hidden until checked
-          setTempSliderVisible(tempEnable.checked);
-
-          // OPTIONAL: if you want it checked when a saved temperature exists
-          // (or when you later add a dedicated tempEnabled setting)
-          try {
-            const savedTemp = await window.settings.getTemperature();
-            temperature.value = savedTemp;
-            temperatureValue.textContent = savedTemp;
-
-            // if you want slider to appear automatically when temp exists:
-            // tempEnable.checked = true;
-            // setTempSliderVisible(true);
-          } catch (e) {
-            console.warn('Could not load temperature:', e);
-          }
-        });
-    </script>
+    <script src="js/settings.page.js" type="module"></script>
 </body>
 </html>
