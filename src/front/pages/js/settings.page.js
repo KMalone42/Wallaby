@@ -153,3 +153,31 @@ async function loadSettings() {
         console.error('Error loading settings:', error);
     }
 }
+
+// Used by model selection
+async function loadModels() {
+    try {
+        const response = await fetch('http://saruman:11434/api/tags');
+        if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}`);
+        }
+
+        const data = await response.json();
+        const select = document.getElementById('modelSelect');
+
+        // Clear old options except placeholder
+        select.innerHTML = '<option value="">Select a model</option>';
+
+        for (const item of data.models) {
+            const option = document.createElement('option');
+
+            // usually name is what you want to display
+            option.value = item.name;
+            option.textContent = item.name;
+
+            select.appendChild(option);
+        }
+    } catch (err) {
+        console.error('Failed to load models:', err);
+    }
+}
