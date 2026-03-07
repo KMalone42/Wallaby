@@ -109,12 +109,14 @@ async function saveSettings() {
 }
 
 async function reloadModels() {
+    console.log("model-button pressed")
     const select = document.getElementById('model-select');
     let ollamaModels = ollamaEndpoint + "/api/tags"
 
     try {
         const response = await fetch(ollamaModels);
         const data = await response.json();
+        console.log(`contacted ${ollamaModels}`)
 
         // wipe existing options
         select.innerHTML = '';
