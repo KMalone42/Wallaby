@@ -68,7 +68,7 @@ async function saveSettings() {
     try {
         const theme          = document.getElementById('theme').value;
         const language       = document.getElementById('language').value;
-        const model          = document.getElementById('model').value;
+        const model          = document.getElementById('model-select').value;
         const tempEnabled    = document.getElementById('tempEnable').checked;
         let temperature      = document.getElementById('temperature').value;
         const saveHistory    = document.getElementById('save-history').checked;
@@ -111,7 +111,8 @@ async function saveSettings() {
 async function reloadModels() {
     console.log("model-button pressed")
     const select = document.getElementById('model-select');
-    let ollamaModels = ollamaEndpoint + "/api/tags"
+    const ollamaEndpoint = document.getElementById('ollama-endpoint').value;
+    const ollamaModels = `${ollamaEndpoint}/api/tags`;
 
     try {
         const response = await fetch(ollamaModels);
@@ -172,7 +173,7 @@ async function loadSettings() {
         // Set values in UI
         document.getElementById('theme').value = theme;
         document.getElementById('language').value = language;
-        document.getElementById('model').value = model;
+        document.getElementById('model-select').value = model;
         document.getElementById('temperature').value = temperature;
         document.getElementById('temperature-value').textContent = temperature;
         document.getElementById('save-history').checked = saveHistory;
