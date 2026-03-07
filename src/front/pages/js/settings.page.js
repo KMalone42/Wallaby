@@ -167,6 +167,8 @@ async function loadSettings() {
         const autoSave = await window.settings.getAutoSave();
         const analytics = await window.settings.getAnalytics();
         const ollamaEndpoint = await window.settings.getOllamaBaseUrl();
+        const prependPrompt = await window.settings.getPrependPrompt();
+        const appendPrompt = await window.settings.getAppendPrompt();
         const maxTokens = await window.settings.getMaxTokens();
         const timeout = await window.settings.getTimeout();
         
@@ -180,6 +182,8 @@ async function loadSettings() {
         document.getElementById('auto-save').checked = autoSave;
         document.getElementById('analytics').checked = analytics;
         document.getElementById('ollama-endpoint').value = ollamaEndpoint;
+        document.getElementById('prependPrompt').value = prependPrompt;
+        document.getElementById('appendPrompt').value = appendPrompt;
         document.getElementById('max-tokens').value = maxTokens;
         document.getElementById('timeout').value = timeout;
         

@@ -73,94 +73,42 @@ function logSet(key, value) {
   return true;
 }
 
+// ----------------------------------------------------------------------------
 // Setters
 // ----------------------------------------------------------------------------
-ipcMain.handle('settings:setTheme', (_, theme) =>
-  logSet('theme', theme)
-);
-ipcMain.handle('settings:setOllamaBaseUrl', (_, ollamaBaseUrl) =>
-  logSet('ollamaBaseUrl', ollamaBaseUrl)
-);
-ipcMain.handle('settings:setLanguage', (_, language) =>
-  logSet('language', language)
-);
-ipcMain.handle('settings:setModel', (_, model) =>
-  logSet('model', model)
-);
-ipcMain.handle('settings:setTemperature', (_, temperature) =>
-  logSet('temperature', temperature)
-);
-ipcMain.handle('settings:setSaveHistory', (_, saveHistory) =>
-  logSet('saveHistory', saveHistory)
-);
-ipcMain.handle('settings:setAutoSave', (_, autoSave) =>
-  logSet('autoSave', autoSave)
-);
-ipcMain.handle('settings:setAnalytics', (_, analytics) =>
-  logSet('analytics', analytics)
-);
-ipcMain.handle('settings:setPrependPrompt', (_, prependPrompt) =>
-  logSet('prependPrompt', prependPrompt)
-);
-ipcMain.handle('settings:setAppendPrompt', (_, appendPrompt) =>
-  logSet('appendPrompt', appendPrompt)
-);
-ipcMain.handle('settings:setMaxTokens', (_, maxTokens) =>
-  logSet('maxTokens', maxTokens)
-);
-ipcMain.handle('settings:setTimeout', (_, timeout) =>
-  logSet('timeout', timeout)
-);
+ipcMain.handle('settings:setTheme', (_, theme) => logSet('theme', theme) );
+ipcMain.handle('settings:setOllamaBaseUrl', (_, ollamaBaseUrl) => logSet('ollamaBaseUrl', ollamaBaseUrl) );
+ipcMain.handle('settings:setLanguage', (_, language) => logSet('language', language) );
+ipcMain.handle('settings:setModel', (_, model) => logSet('model', model) );
+ipcMain.handle('settings:setTemperature', (_, temperature) => logSet('temperature', temperature) );
+ipcMain.handle('settings:setSaveHistory', (_, saveHistory) => logSet('saveHistory', saveHistory) );
+ipcMain.handle('settings:setAutoSave', (_, autoSave) => logSet('autoSave', autoSave) );
+ipcMain.handle('settings:setAnalytics', (_, analytics) => logSet('analytics', analytics) );
+ipcMain.handle('settings:setPrependPrompt', (_, prependPrompt) => logSet('prependPrompt', prependPrompt) );
+ipcMain.handle('settings:setAppendPrompt', (_, appendPrompt) => logSet('appendPrompt', appendPrompt) );
+ipcMain.handle('settings:setMaxTokens', (_, maxTokens) => logSet('maxTokens', maxTokens) );
+ipcMain.handle('settings:setTimeout', (_, timeout) => logSet('timeout', timeout) );
+
 // ----------------------------------------------------------------------------
 //
-// Getters
+// Getters (electron-store)
 // ----------------------------------------------------------------------------
-ipcMain.handle('settings:getTheme', () => {
-  console.log(store.get('theme'));
-  return store.get('theme');
-});
-
-
-ipcMain.handle('settings:getOllamaBaseUrl', () => {
-  console.log(store.get('ollamaBaseUrl'));
-  return store.get('ollamaBaseUrl');
-});
-
-
-ipcMain.handle('settings:getLanguage', () => {
-  return store.get('language');
-});
-
-
-ipcMain.handle('settings:getModel', () => {
-  return store.get('model');
-});
-
-
-ipcMain.handle('settings:getTemperature', () => {
-  return store.get('temperature');
-});
-
-ipcMain.handle('settings:getSaveHistory', () => {
-  return store.get('saveHistory');
-});
-
-ipcMain.handle('settings:getAutoSave', () => {
-  return store.get('autoSave');
-});
-
-ipcMain.handle('settings:getAnalytics', () => {
-  return store.get('analytics');
-});
+ipcMain.handle('settings:getTheme', () => { console.log(store.get('theme')); return store.get('theme'); });
+ipcMain.handle('settings:getOllamaBaseUrl', () => { console.log(store.get('ollamaBaseUrl')); return store.get('ollamaBaseUrl'); });
+ipcMain.handle('settings:getLanguage', () => { return store.get('language'); });
+ipcMain.handle('settings:getModel', () => { return store.get('model'); });
+ipcMain.handle('settings:getTemperature', () => { return store.get('temperature'); });
+ipcMain.handle('settings:getSaveHistory', () => { return store.get('saveHistory'); });
+ipcMain.handle('settings:getAutoSave', () => { return store.get('autoSave'); });
+ipcMain.handle('settings:getAnalytics', () => { return store.get('analytics'); });
 ipcMain.handle('settings:getPrependPrompt', () => { return store.get('prependPrompt'); });
 ipcMain.handle('settings:getAppendPrompt',  () => { return store.get('appendPrompt'); });
 ipcMain.handle('settings:getMaxTokens',     () => { return store.get('maxTokens'); });
-ipcMain.handle('settings:getTimeout', () => {
-  return store.get('timeout');
-});
+ipcMain.handle('settings:getTimeout', () => { return store.get('timeout'); });
 
 ipcMain.handle('settings:resetToDefaults', () => {
   store.clear();
   return store.store;
 });
+
 // ----------------------------------------------------------------------------
