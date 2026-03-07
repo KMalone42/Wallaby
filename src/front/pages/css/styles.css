@@ -247,6 +247,43 @@ body {
   fill: currentColor;
 }
 
+
+#reload-button {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #458588;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: transform 0.2s, box-shadow 0.2s;
+    padding: 0; /* remove padding */
+    outline: none;
+}
+
+#reload-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#reload-button:active {
+    transform: translateY(0);
+}
+
+#reload-button:focus {
+    outline: 2px solid #83a598; /* lighter blue */
+}
+
+.reload-icon{
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+
 /* Popup styles */
 #popup-overlay {
     position: fixed;
