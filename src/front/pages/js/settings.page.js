@@ -110,9 +110,10 @@ async function saveSettings() {
 
 async function reloadModels() {
     const select = document.getElementById('model-select');
+    let ollamaModels = ollamaEndpoint + "/api/tags"
 
     try {
-        const response = await fetch('http://saruman:11434/api/tags');
+        const response = await fetch(ollamaModels);
         const data = await response.json();
 
         // wipe existing options
