@@ -1,8 +1,9 @@
 // main.js (ESM)
-import { app, BrowserWindow, Menu, ipcMain, nativeTheme } from 'electron';
+import { app, BrowserWindow, Menu, ipcMain, nativeTheme, dialog } from 'electron';
 import path from 'path';
 import Store from 'electron-store';
 import { fileURLToPath } from 'url';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -50,7 +51,6 @@ function createWindow() {
 
 // Register IPC handler to open file dialog
 ipcMain.on('open-file-dialog', (event) => {
-  const { dialog } = require('electron'); // Best practice to require here or pass in createWindow
 
   const options = {
     properties: ['openFile'],

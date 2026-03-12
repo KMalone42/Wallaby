@@ -302,7 +302,7 @@ onMainEvent('file-selected', (filePath) => {
 
 const openFileDialog = () => {
   console.log('Opening file dialog');
-  sendToMain('open-file-dialog', null);
+  api.send('open-file-dialog', null);
 };
 
 document.getElementById('attach-button')?.addEventListener('click', openFileDialog);
