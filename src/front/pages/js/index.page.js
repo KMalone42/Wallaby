@@ -190,15 +190,38 @@ async function sendMessage() {
   console.log('sendMessage clicked');
   const messageInput = document.getElementById('message-input');
   const message = messageInput.value.trim();
+  
+  // Get attached images from attach-container
+  const attachContainer = document.querySelector('.attach-container');
+  const attachedImages = [];
+  
+  // Remove existing attachments
+  const existingAttachments = attachContainer.querySelectorAll('.attachment-preview');
+  existingAttachments.forEach(attachment => attachment.remove());
+  
+  // Clear the message input if no text
+  if (!message) {
+    message = '';
+  }
+  
   if (!message) return;
 
   addMessage(message, true);
   messageInput.value = '';
 
+  // Get any attached images from the attach-container
+  const attachmentPreviews = attachContainer.querySelectorAll('.attachment-preview');
+  for (const attachment of attachmentPreviews) {
+    const imgElement = attachment.querySelector('img');
+    if (imgElement) {
+      attachedImages.push(imgElement.src);
+    }
+  }
+
   const thinkingNode = addMessage("Thinking...", false);
 
   try {
-    const response = await callOllamaAPI(message);
+    const response = await callOllamaAPI(message, attachedImages);
     thinkingNode.remove();
     addMessage(response, false);
   } catch (error) {
@@ -295,6 +318,102 @@ onMainEvent('file-selected', (filePath) => {
   const fileDisplay = document.getElementById('file-display');
   if (fileDisplay) {
     fileDisplay.innerText = `You selected: ${filePath}`;
+  }
+
+  // Create thumbnail preview in attach-container
+  const attachContainer = document.querySelector('.attach-container');
+  if (attachContainer) {
+    // Check if this is an image file
+    const fileExtension = filePath.split('.').pop().toLowerCase();
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+    
+    if (imageExtensions.includes(fileExtension)) {
+      // Create attachment preview element
+      const attachmentPreview = document.createElement('div');
+      attachmentPreview.className = 'attachment-preview';
+      attachmentPreview.style.display = 'inline-block';
+      attachmentPreview.style.margin = '5px';
+      attachmentPreview.style.border = '1px solid #ccc';
+      attachmentPreview.style.borderRadius = '5px';
+      attachmentPreview.style.padding = '5px';
+      attachmentPreview.style.background = '#f5f5f5';
+      
+      // Create image element for thumbnail
+      const img = document.createElement('img');
+      img.src = filePath;
+      img.style.maxWidth = '100px';
+      img.style.maxHeight = '100px';
+      img.style.objectFit = 'cover';
+      img.style.borderRadius = '3px';
+      
+      // Create remove button
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = '×';
+      removeBtn.style.position = 'absolute';
+      removeBtn.style.top = '2px';
+      removeBtn.style.right = '2px';
+      removeBtn.style.background = 'red';
+      removeBtn.style.color = 'white';
+      removeBtn.style.border = 'none';
+      removeBtn.style.borderRadius = '50%';
+      removeBtn.style.width = '20px';
+      removeBtn.style.height = '20px';
+      removeBtn.style.cursor = 'pointer';
+      removeBtn.style.fontSize = '14px';
+      removeBtn.style.lineHeight = '1';
+      removeBtn.style.display = 'flex';
+      removeBtn.style.alignItems = 'center';
+      removeBtn.style.justifyContent = 'center';
+      
+      removeBtn.addEventListener('click', () => {
+        attachmentPreview.remove();
+      });
+      
+      attachmentPreview.appendChild(img);
+      attachmentPreview.appendChild(removeBtn);
+      attachContainer.appendChild(attachmentPreview);
+    } else {
+      // For non-image files, show text preview
+      const attachmentPreview = document.createElement('div');
+      attachmentPreview.className = 'attachment-preview';
+      attachmentPreview.style.display = 'inline-block';
+      attachmentPreview.style.margin = '5px';
+      attachmentPreview.style.border = '1px solid #ccc';
+      attachmentPreview.style.borderRadius = '5px';
+      attachmentPreview.style.padding = '5px';
+      attachmentPreview.style.background = '#f5f5f5';
+      
+      const text = document.createElement('span');
+      text.textContent = `📎 ${filePath.split('/').pop()}`;
+      text.style.fontSize = '12px';
+      text.style.color = '#666';
+      
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = '×';
+      removeBtn.style.position = 'absolute';
+      removeBtn.style.top = '2px';
+      removeBtn.style.right = '2px';
+      removeBtn.style.background = 'red';
+      removeBtn.style.color = 'white';
+      removeBtn.style.border = 'none';
+      removeBtn.style.borderRadius = '50%';
+      removeBtn.style.width = '20px';
+      removeBtn.style.height = '20px';
+      removeBtn.style.cursor = 'pointer';
+      removeBtn.style.fontSize = '14px';
+      removeBtn.style.lineHeight = '1';
+      removeBtn.style.display = 'flex';
+      removeBtn.style.alignItems = 'center';
+      removeBtn.style.justifyContent = 'center';
+      
+      removeBtn.addEventListener('click', () => {
+        attachmentPreview.remove();
+      });
+      
+      attachmentPreview.appendChild(text);
+      attachmentPreview.appendChild(removeBtn);
+      attachContainer.appendChild(attachmentPreview);
+    }
   }
 
   showPopup(`File selected: ${filePath}`);
