@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         settingsButton.addEventListener('click', () => {
             // Navigate to settings page
             window.location.href = 'settings.html';
-        });
+        }
     }
 
     // Add initial welcome message
