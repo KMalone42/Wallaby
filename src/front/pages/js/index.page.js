@@ -288,33 +288,22 @@ document.addEventListener('DOMContentLoaded', () => {
 // File selection handling
 let selectedFile = null;
 
-// 1. Listen for the result coming back from the Main process
 onMainEvent('file-selected', (filePath) => {
   console.log('File selected:', filePath);
   selectedFile = filePath;
-  
-  // Display the selected file path
+
   const fileDisplay = document.getElementById('file-display');
   if (fileDisplay) {
     fileDisplay.innerText = `You selected: ${filePath}`;
   }
-  
-  // Show a message to the user
+
   showPopup(`File selected: ${filePath}`);
-  
-  // Optionally, you could add the file to the chat or process it here
-  // For now, we just store it and let the user know it was selected
 });
 
-// 2. Handle the button click
-document.getElementById('select-file-btn').addEventListener('click', () => {
-  // Send message to Main Process
-  // No need to pass 'win' object if using contextBridge properly
-  sendToMain('open-file-dialog', null); 
-});
-
-// Also handle the attach button directly
-document.getElementById('attach-button').addEventListener('click', () => {
-  console.log('Attach button clicked');
+const openFileDialog = () => {
+  console.log('Opening file dialog');
   sendToMain('open-file-dialog', null);
-});
+};
+
+document.getElementById('attach-button')?.addEventListener('click', openFileDialog);
+document.getElementById('select-file-btn')?.addEventListener('click', openFileDialog);
