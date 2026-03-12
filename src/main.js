@@ -48,6 +48,28 @@ function createWindow() {
   Menu.setApplicationMenu(null);
 }
 
+// Register IPC handler to open file dialog
+ipcMain.on('open-file-dialog', (event) => {
+  const { dialog } = require('electron'); // Best practice to require here or pass in createWindow
+
+  const options = {
+    properties: ['openFile'],
+    filters: [{
+      name: 'Media Files',
+      extensions: ['png', 'jpg', 'gif']
+    }]
+  };
+
+  dialog.showOpenDialog(mainWindow, options).then(({ canceled, filePaths }) => {
+    if (!canceled && filePaths && filePaths.length > 0) {
+      console.log('Selected file:', filePaths[0]);
+      
+      // Send the result back to the renderer process
+      event.reply('file-selected', filePaths[0]);
+    }
+  });
+})
+
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {

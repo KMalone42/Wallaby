@@ -284,3 +284,20 @@ document.addEventListener('DOMContentLoaded', () => {
         addMessage("This is the beginning of a new chat.");
     }, 500);
 });
+
+
+
+// need to look at later, has to do with image input
+const { sendToMain, onMainEvent } = window // Access bridge from preload
+
+// 1. Listen for the result coming back from the Main process
+onMainEvent('file-selected', (filePath) => {
+  document.getElementById('file-display').innerText = `You selected: ${filePath}`
+})
+
+// 2. Handle the button click
+document.getElementById('select-file-btn').addEventListener('click', () => {
+  // Send message to Main Process
+  // No need to pass 'win' object if using contextBridge properly
+  sendToMain('open-file-dialog', null); 
+})

@@ -24,6 +24,13 @@ contextBridge.exposeInMainWorld('api', {
   invoke: (channel, data) => ipcRenderer.invoke(channel, data),
 });
 
+// Expose event listener for the result back to the renderer
+contextBridge.exposeInMainWorld('onMainEvent', (channel, callback) => {
+  ipcRenderer.on(channel, (event, ...args) => {
+    callback(...args)
+  })
+})
+
 // Expose settings API
 contextBridge.exposeInMainWorld('settings', {
   getTheme: () => ipcRenderer.invoke('settings:getTheme'),
