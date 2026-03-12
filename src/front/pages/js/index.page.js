@@ -60,7 +60,50 @@ function addMessage(content, isUser = false) {
   return messageDiv;
 }
 
+// Convert image file to base64
+async function imageToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
+// Handle image upload and message sending
+async function handleImageMessage(images, message) {
+  if (!message) {
+    message = "Here is an image:";
+  }
+
+  // Convert images to base64
+  const base64Images = [];
+  for (const img of images) {
+    try {
+      const base64 = await imageToBase64(img);
+      base64Images.push(base64);
+    } catch (error) {
+      console.error('Error converting image:', error);
+      throw new Error('Failed to process image');
+    }
+  }
+
+  // Add message with images
+  const messageDiv = addMessage(message, true);
+
+  // Add image previews
+  for (const base64 of base64Images) {
+    const imgDiv = document.createElement('div');
+    imgDiv.className = 'message-image';
+    imgDiv.innerHTML = `
+      <img src="${base64}" alt="Uploaded image">
+      <p>Image attached</p>
+    `;
+    messageDiv.appendChild(imgDiv);
+  }
+
+  return base64Images;
+}
 
 // Cache for settings to avoid repeated API calls
 let cachedSettings = null;
@@ -100,13 +143,14 @@ async function getSettings() {
     return settings;
 }
 
-async function callOllamaAPI(prompt) {
+async function callOllamaAPI(prompt, images = []) {
     try {
         const settings = await getSettings();
         console.log('Using endpoint:', settings.ollamaBaseUrl);
         console.log('Using model:', settings.model);
         console.log('Using temperature:', settings.temperature);
         console.log('Using maxTokens:', settings.maxTokens);
+        console.log('Using images:', images.length);
         
         const response = await fetch(`${settings.ollamaBaseUrl}/api/generate`, {
             method: 'POST',
@@ -118,7 +162,8 @@ async function callOllamaAPI(prompt) {
                 prompt: prompt,
                 stream: false,
                 temperature: settings.temperature || 0.7,
-                max_tokens: settings.maxTokens || 1000
+                max_tokens: settings.maxTokens || 1000,
+                images: images.length > 0 ? images : undefined
             })
         });
         
