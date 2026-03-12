@@ -337,6 +337,8 @@ onMainEvent('file-selected', (filePath) => {
       attachmentPreview.style.borderRadius = '5px';
       attachmentPreview.style.padding = '5px';
       attachmentPreview.style.background = '#f5f5f5';
+      attachmentPreview.style.position = 'relative';
+
       
       // Create image element for thumbnail
       const img = document.createElement('img');
