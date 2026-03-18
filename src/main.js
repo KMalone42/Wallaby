@@ -1,5 +1,5 @@
 // main.js (ESM)
-import { app, BrowserWindow, Menu, ipcMain, nativeTheme, dialog } from 'electron';
+import { app, BrowserWindow, Menu, ipcMain, nativeTheme, dialog, fs } from 'electron';
 import path from 'path';
 import Store from 'electron-store';
 import { fileURLToPath } from 'url';
@@ -131,6 +131,84 @@ ipcMain.handle('settings:getTimeout', () => { return store.get('timeout'); });
 ipcMain.handle('settings:resetToDefaults', () => {
   store.clear();
   return store.store;
+});
+
+// ----------------------------------------------------------------------------
+// Temporary File Storage IPC Handlers
+// ----------------------------------------------------------------------------
+ipcMain.handle('file-storage:save', async (_, key, content) => {
+  try {
+    const userDataPath = app.getPath('userData');
+    const filePath = path.join(userDataPath, 'temp-files', key);
+    
+    // Create temp-files directory if it doesn't exist
+    const tempDir = path.join(userDataPath, 'temp-files');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+    
+    // Write content to file
+    fs.writeFileSync(filePath, content, 'utf8');
+    console.log(`[file-storage] saved ${key} to ${filePath}`);
+    return { success: true, path: filePath };
+  } catch (error) {
+    console.error(`[file-storage] error saving ${key}:`, error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('file-storage:read', async (_, key) => {
+  try {
+    const userDataPath = app.getPath('userData');
+    const filePath = path.join(userDataPath, 'temp-files', key);
+    
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'File not found' };
+    }
+    
+    const content = fs.readFileSync(filePath, 'utf8');
+    console.log(`[file-storage] read ${key} from ${filePath}`);
+    return { success: true, content: content };
+  } catch (error) {
+    console.error(`[file-storage] error reading ${key}:`, error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('file-storage:delete', async (_, key) => {
+  try {
+    const userDataPath = app.getPath('userData');
+    const filePath = path.join(userDataPath, 'temp-files', key);
+    
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      console.log(`[file-storage] deleted ${key} from ${filePath}`);
+      return { success: true };
+    } else {
+      return { success: true, message: 'File did not exist' };
+    }
+  } catch (error) {
+    console.error(`[file-storage] error deleting ${key}:`, error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('file-storage:list', async () => {
+  try {
+    const userDataPath = app.getPath('userData');
+    const tempDir = path.join(userDataPath, 'temp-files');
+    
+    if (!fs.existsSync(tempDir)) {
+      return { success: true, files: [] };
+    }
+    
+    const files = fs.readdirSync(tempDir);
+    console.log(`[file-storage] listed ${files.length} files`);
+    return { success: true, files: files };
+  } catch (error) {
+    console.error(`[file-storage] error listing files:`, error);
+    return { success: false, error: error.message };
+  }
 });
 
 // ----------------------------------------------------------------------------

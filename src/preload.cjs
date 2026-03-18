@@ -59,3 +59,11 @@ contextBridge.exposeInMainWorld('settings', {
   setTimeout: (timeout) => ipcRenderer.invoke('settings:setTimeout', timeout),
   resetToDefaults: () => ipcRenderer.invoke('settings:resetToDefaults'),
 });
+
+// Expose file storage API
+contextBridge.exposeInMainWorld('fileStorage', {
+  save: (key, content) => ipcRenderer.invoke('file-storage:save', key, content),
+  read: (key) => ipcRenderer.invoke('file-storage:read', key),
+  delete: (key) => ipcRenderer.invoke('file-storage:delete', key),
+  list: () => ipcRenderer.invoke('file-storage:list'),
+});
