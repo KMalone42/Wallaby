@@ -151,6 +151,7 @@ async function callOllamaAPI(prompt, images = []) {
         console.log('Using temperature:', settings.temperature);
         console.log('Using maxTokens:', settings.maxTokens);
         console.log('Using images:', images.length);
+        console.log('Exact prompt being sent:', prompt);
         
         const response = await fetch(`${settings.ollamaBaseUrl}/api/generate`, {
             method: 'POST',
