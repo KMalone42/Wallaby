@@ -428,3 +428,19 @@ const openFileDialog = () => {
 
 document.getElementById('attach-button')?.addEventListener('click', openFileDialog);
 document.getElementById('select-file-btn')?.addEventListener('click', openFileDialog);
+
+
+async function extractTextFromImages(images) {
+   const tesseract = await import('tesseract.js');
+   const results = [];
+
+   for (const img of images) {
+       const worker = await tesseract.createWorker('eng');
+       const { data: { text } } = await worker.recognize(img);
+       results.push(text);
+       await worker.terminate();
+   }
+
+   return results.join('\n\n');
+}
+
