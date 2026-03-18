@@ -221,6 +221,8 @@ async function sendMessage() {
 
   // Extract text from images if any are attached
   let imageText = '';
+  let thinkingNode = null;
+  
   if (attachedImages.length > 0) {
     try {
       imageText = await extractTextFromImages(attachedImages);
@@ -233,11 +235,13 @@ async function sendMessage() {
         
         // Use the combined prompt for the API call
         const response = await callOllamaAPI(promptWithImages, attachedImages);
+        thinkingNode = addMessage("Thinking...", false);
         thinkingNode.remove();
         addMessage(response, false);
       } else {
         // No text extracted, send original message with images
         const response = await callOllamaAPI(message, attachedImages);
+        thinkingNode = addMessage("Thinking...", false);
         thinkingNode.remove();
         addMessage(response, false);
       }
@@ -245,12 +249,13 @@ async function sendMessage() {
       console.error('Error extracting text from images:', error);
       // If extraction fails, send original message with images
       const response = await callOllamaAPI(message, attachedImages);
+      thinkingNode = addMessage("Thinking...", false);
       thinkingNode.remove();
       addMessage(response, false);
     }
   } else {
     // No images attached, send message as normal
-    const thinkingNode = addMessage("Thinking...", false);
+    thinkingNode = addMessage("Thinking...", false);
 
     try {
       const response = await callOllamaAPI(message, attachedImages);
