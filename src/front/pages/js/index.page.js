@@ -191,6 +191,9 @@ async function sendMessage() {
   console.log('sendMessage clicked');
   const messageInput = document.getElementById('message-input');
   const message = messageInput.value.trim();
+
+
+  // message transforming
   
   // Get attached images from attach-container
   const attachContainer = document.querySelector('.attach-container');
@@ -224,6 +227,7 @@ async function sendMessage() {
   let thinkingNode = null;
   
   if (attachedImages.length > 0) {
+    console.log('Detected Attached Image');
     try {
       imageText = await extractTextFromImages(attachedImages);
       console.log('Extracted text from images:', imageText);
