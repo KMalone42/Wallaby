@@ -318,14 +318,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const messageInput = document.getElementById('message-input');
+    const textarea = document.getElementById("message-input");
 
-    function autosize(el) {
-        el.style.height = "auto";
-        el.style.height = Math.min(el.scrollHeight, 160) + "px"; // 160px cap
+    function autoResize(el) {
+      el.style.height = "auto";
+      el.style.height = el.scrollHeight + "px";
     }
 
-    messageInput.addEventListener("input", () => autosize(messageInput));
-    autosize(messageInput);
+    textarea.addEventListener("input", () => autoResize(textarea));
+
+    // optional: run once on load
+    autoResize(textarea);
 
     if (messageInput) {
         messageInput.addEventListener('keypress', (e) => {
