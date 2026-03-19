@@ -1,5 +1,5 @@
 // main.js (ESM)
-import { app, BrowserWindow, Menu, ipcMain, nativeTheme, dialog, fs } from 'electron';
+import { app, BrowserWindow, Menu, ipcMain, nativeTheme, dialog} from 'electron';
 import path from 'path';
 import Store from 'electron-store';
 import { fileURLToPath } from 'url';
