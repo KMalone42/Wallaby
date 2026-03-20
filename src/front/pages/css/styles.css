@@ -126,12 +126,14 @@ body {
 
 .ai-message {
     background: #98971a;
+    padding: 12px 12px;
     align-self: flex-start;
     border-bottom-left-radius: 5px;
 }
 
 .user-message {
     background: #458588;
+    padding: 12px 12px;
     align-self: flex-end;
     border-bottom-right-radius: 5px;
 }

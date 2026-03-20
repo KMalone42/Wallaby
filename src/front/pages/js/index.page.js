@@ -203,12 +203,23 @@ async function sendMessage() {
   const existingAttachments = attachContainer.querySelectorAll('.attachment-preview');
   existingAttachments.forEach(attachment => attachment.remove());
   
-  // Clear the message input if no text
-  if (!message) {
-    message = '';
+  if (!message) { message = ''; return }
+  if (message.startsWith('/')) { // Is '/' command?
+    switch (message.slice(1)) {      
+      case "export":
+        // export message history
+        addMessage("Export Feature not implemented yet");
+        break;
+      case "exit":
+        // exit application
+        addMessage("Exit Feature not implemented yet");
+        break;
+      default:
+        addMessage("Command unknown");
+    }
+    return;
   }
   
-  if (!message) return;
 
   addMessage(message, true);
   messageInput.value = '';
