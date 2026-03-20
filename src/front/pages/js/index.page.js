@@ -332,9 +332,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (messageInput) {
         messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                //e.target.closest('form').submit()
                 sendMessage();
             }
+            // Else default behavior (newline)
         });
     }
 
