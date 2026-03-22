@@ -188,6 +188,7 @@ async function callOllamaAPI(prompt, images = []) {
 
 // Triggers toolchain
 async function sendMessage() {
+  //ISSUE TO BE RESOLVED, on message send, text area should be auto reset.
   console.log('sendMessage clicked');
   const messageInput = document.getElementById('message-input');
   const message = messageInput.value.trim();
@@ -223,6 +224,7 @@ async function sendMessage() {
 
   addMessage(message, true);
   messageInput.value = '';
+  messageInput.style.height = 'auto'; // Reset textarea to default height
 
   // Get any attached images from the attach-container
   const attachmentPreviews = attachContainer.querySelectorAll('.attachment-preview');
