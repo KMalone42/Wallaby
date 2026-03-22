@@ -196,12 +196,37 @@ async function sendMessage() {
   // Get attached images from attach-container
   const attachContainer = document.querySelector('.attach-container');
   const attachedImages = [];
-  
-  // Remove existing attachments
-  const existingAttachments = attachContainer.querySelectorAll('.attachment-preview');
-  existingAttachments.forEach(attachment => attachment.remove());
-  
-  if (!message) { message = ''; return }
+
+  const attachmentPreviews = attachContainer.querySelectorAll('.attachment-preview');
+  const attachedImageDataUrls = [];
+  const attachedImageKeys = [];
+
+  for (const attachment of attachmentPreviews) {
+    const imageKey = attachment.dataset.fullImageKey;
+    if (!imageKey) {
+      continue;
+    }
+
+    try {
+      const imageResult = await window.fileStorage.readBase64(imageKey);
+      if (imageResult?.success) {
+        attachedImages.push(imageResult.base64);
+        attachedImageDataUrls.push(imageResult.dataUrl);
+        attachedImageKeys.push(imageKey);
+      } else {
+        console.error('Failed to read image data:', imageResult?.error);
+      }
+    } catch (error) {
+      console.error('Failed to load image data:', error);
+    }
+  }
+
+  if (!message && attachedImages.length === 0) {
+    return;
+  }
+  if (!message && attachedImages.length > 0) {
+    message = 'Here is an image:';
+  }
   if (message.startsWith('/')) { // Is '/' command?
     switch (message.slice(1)) {      
       case "export":
@@ -236,12 +261,13 @@ async function sendMessage() {
   }
 
   
-  // Get any attached images from the attach-container
-  const attachmentPreviews = attachContainer.querySelectorAll('.attachment-preview');
-  for (const attachment of attachmentPreviews) {
-    const imgElement = attachment.querySelector('img');
-    if (imgElement) {
-      attachedImages.push(imgElement.src);
+  // Clear attachments after capture
+  attachmentPreviews.forEach((attachment) => attachment.remove());
+  for (const imageKey of attachedImageKeys) {
+    try {
+      await window.fileStorage.delete(imageKey);
+    } catch (error) {
+      console.error('Failed to delete temp image:', error);
     }
   }
 
@@ -252,7 +278,7 @@ async function sendMessage() {
   if (attachedImages.length > 0) {
     console.log('Detected Attached Image');
     try {
-      imageText = await extractTextFromImages(attachedImages);
+      imageText = await extractTextFromImages(attachedImageDataUrls);
       console.log('Extracted text from images:', imageText);
       
       // Append extracted text to the message prompt
@@ -383,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // File selection handling
 let selectedFile = null;
 
-onMainEvent('file-selected', (filePath) => {
+onMainEvent('file-selected', async (filePath) => {
   console.log('File selected:', filePath);
   selectedFile = filePath;
 
@@ -392,15 +418,19 @@ onMainEvent('file-selected', (filePath) => {
     fileDisplay.innerText = `You selected: ${filePath}`;
   }
 
+  const saveResult = await window.fileStorage.saveFromPath(filePath);
+  if (!saveResult?.success) {
+    showPopup(`Failed to store file: ${saveResult?.error || 'Unknown error'}`);
+    return;
+  }
+
   // Create thumbnail preview in attach-container
   const attachContainer = document.querySelector('.attach-container');
   if (attachContainer) {
-    // Check if this is an image file
     const fileExtension = filePath.split('.').pop().toLowerCase();
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
-    
+
     if (imageExtensions.includes(fileExtension)) {
-      // Create attachment preview element
       const attachmentPreview = document.createElement('div');
       attachmentPreview.className = 'attachment-preview';
       attachmentPreview.style.display = 'inline-block';
@@ -410,17 +440,17 @@ onMainEvent('file-selected', (filePath) => {
       attachmentPreview.style.padding = '5px';
       attachmentPreview.style.background = '#f5f5f5';
       attachmentPreview.style.position = 'relative';
+      attachmentPreview.dataset.fullImageKey = saveResult.key;
+      attachmentPreview.dataset.fullImagePath = saveResult.path;
 
-      
-      // Create image element for thumbnail
       const img = document.createElement('img');
-      img.src = filePath;
+      const previewUrl = new URL(`file://${saveResult.path}`);
+      img.src = previewUrl.href;
       img.style.maxWidth = '100px';
       img.style.maxHeight = '100px';
       img.style.objectFit = 'cover';
       img.style.borderRadius = '3px';
-      
-      // Create remove button
+
       const removeBtn = document.createElement('button');
       removeBtn.textContent = '×';
       removeBtn.style.position = 'absolute';
@@ -438,16 +468,20 @@ onMainEvent('file-selected', (filePath) => {
       removeBtn.style.display = 'flex';
       removeBtn.style.alignItems = 'center';
       removeBtn.style.justifyContent = 'center';
-      
-      removeBtn.addEventListener('click', () => {
+
+      removeBtn.addEventListener('click', async () => {
         attachmentPreview.remove();
+        try {
+          await window.fileStorage.delete(saveResult.key);
+        } catch (error) {
+          console.error('Failed to delete temp image:', error);
+        }
       });
-      
+
       attachmentPreview.appendChild(img);
       attachmentPreview.appendChild(removeBtn);
       attachContainer.appendChild(attachmentPreview);
     } else {
-      // For non-image files, show text preview
       const attachmentPreview = document.createElement('div');
       attachmentPreview.className = 'attachment-preview';
       attachmentPreview.style.display = 'inline-block';
@@ -456,12 +490,12 @@ onMainEvent('file-selected', (filePath) => {
       attachmentPreview.style.borderRadius = '5px';
       attachmentPreview.style.padding = '5px';
       attachmentPreview.style.background = '#f5f5f5';
-      
+
       const text = document.createElement('span');
       text.textContent = `📎 ${filePath.split('/').pop()}`;
       text.style.fontSize = '12px';
       text.style.color = '#666';
-      
+
       const removeBtn = document.createElement('button');
       removeBtn.textContent = '×';
       removeBtn.style.position = 'absolute';
@@ -479,11 +513,16 @@ onMainEvent('file-selected', (filePath) => {
       removeBtn.style.display = 'flex';
       removeBtn.style.alignItems = 'center';
       removeBtn.style.justifyContent = 'center';
-      
-      removeBtn.addEventListener('click', () => {
+
+      removeBtn.addEventListener('click', async () => {
         attachmentPreview.remove();
+        try {
+          await window.fileStorage.delete(saveResult.key);
+        } catch (error) {
+          console.error('Failed to delete temp file:', error);
+        }
       });
-      
+
       attachmentPreview.appendChild(text);
       attachmentPreview.appendChild(removeBtn);
       attachContainer.appendChild(attachmentPreview);
@@ -503,15 +542,13 @@ document.getElementById('select-file-btn')?.addEventListener('click', openFileDi
 
 
 async function extractTextFromImages(images) {
-   const tesseract = await import('tesseract.js');
    const results = [];
 
    for (const img of images) {
-       const worker = await tesseract.createWorker('eng');
-       const { data: { text } } = await worker.recognize(img);
-       results.push(text);
-       await worker.terminate();
+     const text = await window.ocr.recognize(img, 'eng');
+     results.push(text);
    }
 
    return results.join('\n\n');
-}
+ }
+

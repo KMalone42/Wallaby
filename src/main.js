@@ -1,6 +1,7 @@
 // main.js (ESM)
 import { app, BrowserWindow, Menu, ipcMain, nativeTheme, dialog} from 'electron';
 import path from 'path';
+import fs from 'fs';
 import Store from 'electron-store';
 import { fileURLToPath } from 'url';
 
@@ -136,19 +137,95 @@ ipcMain.handle('settings:resetToDefaults', () => {
 // ----------------------------------------------------------------------------
 // Temporary File Storage IPC Handlers
 // ----------------------------------------------------------------------------
+const tempFilesStoreKey = 'tempFiles';
+
+function getTempDir() {
+  return path.join(app.getPath('userData'), 'temp-files');
+}
+
+function ensureTempDir() {
+  const tempDir = getTempDir();
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+  }
+  return tempDir;
+}
+
+function getMimeTypeFromExtension(fileExtension) {
+  switch (fileExtension) {
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.png':
+      return 'image/png';
+    case '.gif':
+      return 'image/gif';
+    case '.webp':
+      return 'image/webp';
+    case '.bmp':
+      return 'image/bmp';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
+ipcMain.handle('file-storage:save-from-path', async (_, sourcePath) => {
+  try {
+    const tempDir = ensureTempDir();
+    const fileExtension = path.extname(sourcePath);
+    const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    const key = `${uniqueSuffix}${fileExtension}`;
+    const destinationPath = path.join(tempDir, key);
+
+    fs.copyFileSync(sourcePath, destinationPath);
+    store.set(`${tempFilesStoreKey}.${key}`, destinationPath);
+
+    console.log(`[file-storage] copied ${sourcePath} to ${destinationPath}`);
+    return {
+      success: true,
+      key,
+      path: destinationPath,
+      mimeType: getMimeTypeFromExtension(fileExtension.toLowerCase())
+    };
+  } catch (error) {
+    console.error('[file-storage] error saving from path:', error);
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('file-storage:read-base64', async (_, key) => {
+  try {
+    const tempDir = getTempDir();
+    const filePath = path.join(tempDir, key);
+
+    if (!fs.existsSync(filePath)) {
+      return { success: false, error: 'File not found' };
+    }
+
+    const fileExtension = path.extname(filePath).toLowerCase();
+    const base64 = fs.readFileSync(filePath).toString('base64');
+    const mimeType = getMimeTypeFromExtension(fileExtension);
+
+    return {
+      success: true,
+      base64,
+      dataUrl: `data:${mimeType};base64,${base64}`,
+      mimeType
+    };
+  } catch (error) {
+    console.error('[file-storage] error reading base64:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 ipcMain.handle('file-storage:save', async (_, key, content) => {
   try {
-    const userDataPath = app.getPath('userData');
-    const filePath = path.join(userDataPath, 'temp-files', key);
-    
-    // Create temp-files directory if it doesn't exist
-    const tempDir = path.join(userDataPath, 'temp-files');
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
-    }
-    
-    // Write content to file
+    const tempDir = ensureTempDir();
+    const filePath = path.join(tempDir, key);
+
     fs.writeFileSync(filePath, content, 'utf8');
+    store.set(`${tempFilesStoreKey}.${key}`, filePath);
+
     console.log(`[file-storage] saved ${key} to ${filePath}`);
     return { success: true, path: filePath };
   } catch (error) {
@@ -159,13 +236,13 @@ ipcMain.handle('file-storage:save', async (_, key, content) => {
 
 ipcMain.handle('file-storage:read', async (_, key) => {
   try {
-    const userDataPath = app.getPath('userData');
-    const filePath = path.join(userDataPath, 'temp-files', key);
-    
+    const tempDir = getTempDir();
+    const filePath = path.join(tempDir, key);
+
     if (!fs.existsSync(filePath)) {
       return { success: false, error: 'File not found' };
     }
-    
+
     const content = fs.readFileSync(filePath, 'utf8');
     console.log(`[file-storage] read ${key} from ${filePath}`);
     return { success: true, content: content };
@@ -177,16 +254,18 @@ ipcMain.handle('file-storage:read', async (_, key) => {
 
 ipcMain.handle('file-storage:delete', async (_, key) => {
   try {
-    const userDataPath = app.getPath('userData');
-    const filePath = path.join(userDataPath, 'temp-files', key);
-    
+    const tempDir = getTempDir();
+    const filePath = path.join(tempDir, key);
+
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
+      store.delete(`${tempFilesStoreKey}.${key}`);
       console.log(`[file-storage] deleted ${key} from ${filePath}`);
       return { success: true };
-    } else {
-      return { success: true, message: 'File did not exist' };
     }
+
+    store.delete(`${tempFilesStoreKey}.${key}`);
+    return { success: true, message: 'File did not exist' };
   } catch (error) {
     console.error(`[file-storage] error deleting ${key}:`, error);
     return { success: false, error: error.message };
@@ -195,13 +274,12 @@ ipcMain.handle('file-storage:delete', async (_, key) => {
 
 ipcMain.handle('file-storage:list', async () => {
   try {
-    const userDataPath = app.getPath('userData');
-    const tempDir = path.join(userDataPath, 'temp-files');
-    
+    const tempDir = getTempDir();
+
     if (!fs.existsSync(tempDir)) {
       return { success: true, files: [] };
     }
-    
+
     const files = fs.readdirSync(tempDir);
     console.log(`[file-storage] listed ${files.length} files`);
     return { success: true, files: files };

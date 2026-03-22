@@ -1,6 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const commonmark = require("commonmark");
 const createDOMPurify = require("dompurify");
+const path = require('path');
+const tesseract = require('tesseract.js');
 
 // CommonMark pipeline
 const parser = new commonmark.Parser();
@@ -62,8 +64,24 @@ contextBridge.exposeInMainWorld('settings', {
 
 // Expose file storage API
 contextBridge.exposeInMainWorld('fileStorage', {
+  saveFromPath: (filePath) => ipcRenderer.invoke('file-storage:save-from-path', filePath),
+  readBase64: (key) => ipcRenderer.invoke('file-storage:read-base64', key),
   save: (key, content) => ipcRenderer.invoke('file-storage:save', key, content),
   read: (key) => ipcRenderer.invoke('file-storage:read', key),
   delete: (key) => ipcRenderer.invoke('file-storage:delete', key),
   list: () => ipcRenderer.invoke('file-storage:list'),
+});
+
+contextBridge.exposeInMainWorld('ocr', {
+  recognize: async (imageDataUrl, language = 'eng') => {
+    const workerPath = require.resolve('tesseract.js/src/worker-script/node/index.js');
+    const worker = await tesseract.createWorker({ workerPath });
+
+    await worker.loadLanguage(language);
+    await worker.initialize(language);
+
+    const { data: { text } } = await worker.recognize(imageDataUrl);
+    await worker.terminate();
+    return text;
+  },
 });
