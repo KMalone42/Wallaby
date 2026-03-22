@@ -191,11 +191,8 @@ async function sendMessage() {
   //ISSUE TO BE RESOLVED, on message send, text area should be auto reset.
   console.log('sendMessage clicked');
   const messageInput = document.getElementById('message-input');
-  const message = messageInput.value.trim();
+  let message = messageInput.value.trim();
 
-
-  // message transforming
-  
   // Get attached images from attach-container
   const attachContainer = document.querySelector('.attach-container');
   const attachedImages = [];
@@ -221,11 +218,24 @@ async function sendMessage() {
     return;
   }
   
-
   addMessage(message, true);
   messageInput.value = '';
   messageInput.style.height = 'auto'; // Reset textarea to default height
 
+  // Message transforming
+  // After this point, we should be using apis and some light logic to 
+  // modify the prompt that the user is giving to us.
+  // --------------------------------------------------------------------------
+  let original_message = message;
+  try {
+    const prependPrompt = await window.settings.getPrependPrompt();
+    const appendPrompt = await window.settings.getAppendPrompt();
+    message = `${prependPrompt}\n${original_message}\n${appendPrompt}`;
+  } catch (error) {
+        console.error('Error loading settings:', error);
+  }
+
+  
   // Get any attached images from the attach-container
   const attachmentPreviews = attachContainer.querySelectorAll('.attachment-preview');
   for (const attachment of attachmentPreviews) {
@@ -274,6 +284,7 @@ async function sendMessage() {
     // No images attached, send message as normal
     thinkingNode = addMessage("Thinking...", false);
 
+  // --------------------------------------------------------------------------
     try {
       const response = await callOllamaAPI(message, attachedImages);
       thinkingNode.remove();
