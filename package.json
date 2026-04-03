@@ -6,7 +6,11 @@
   "type": "module",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --experimental-vm-modules $(which jest)",
+    "test:unit": "node --experimental-vm-modules $(which jest) test/unit/",
+    "test:integration": "node --experimental-vm-modules $(which jest) test/integration/",
+    "test:e2e": "node --experimental-vm-modules $(which jest) test/e2e/",
+    "test:features": "node --experimental-vm-modules $(which jest) test/features/"
   },
   "keywords": [
     "Electron"
@@ -18,5 +22,17 @@
     "dompurify": "^3.3.1",
     "electron-store": "^11.0.2",
     "tesseract.js": "^7.0.0"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "/home/kmalone/.openclaw/workspace/projects/automation/Wallaby.bundle"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0",
+    "jsdom": "^29.0.1"
   }
 }
