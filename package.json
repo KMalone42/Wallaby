@@ -6,11 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "electron .",
-    "test": "node --experimental-vm-modules $(which jest)",
-    "test:unit": "node --experimental-vm-modules $(which jest) test/unit/",
-    "test:integration": "node --experimental-vm-modules $(which jest) test/integration/",
-    "test:e2e": "node --experimental-vm-modules $(which jest) test/e2e/",
-    "test:features": "node --experimental-vm-modules $(which jest) test/features/"
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
   },
   "keywords": [
     "Electron"
